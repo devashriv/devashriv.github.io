@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>CS 590 MAKEMATE V0</title>
+
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <link type="text/css" rel="stylesheet" href="main.css" />
+    <style>
+      body {
+        background-color: #f0f0f0;
+        color: #444;
+      }
+      a {
+        color: #08f;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="info">Pyramid parametric loader<br /></div>
+
+    <script type="module">
+      import * as THREE from "../build/three.module.js";
+
+      //Orbit control
+      import { OrbitControls } from "./jsm/controls/OrbitControls.js";
+      //Transform handles
+      import { TransformControls } from "./jsm/controls/TransformControls.js";
+      //GUI
+      import { GUI } from "./jsm/libs/dat.gui.module.js";
+      //Export to stl for 3D printing
+      import { STLExporter } from "./jsm/exporters/STLExporter.js";
+
+      import Pyramid from "./pyramid.js";
+      import Polyhedron from "./polyhedron.js";
+      import Prism from "./prism.js";
+
+      /**
+       * @author TatumCreative (Greg Tatum) / http://gregtatum.com/
+       */
+
+      var twoPi = Math.PI * 2;
+
+      function updateGroupGeometry(mesh, geometry) {
+        if (geometry.isGeometry) {
+          geometry = new BufferGeometry().fromGeometry(geometry);
+
+          console.warn(
+            "THREE.GeometryBrowser: Converted Geometry to BufferGeometry."
+          );
+        }
+
+        mesh.children[0].geometry.dispose();
+        mesh.children[1].geometry.dispose();
+
+        mesh.children[0].geometry = new WireframeGeometry(geometry);
+        mesh.children[1].geometry = geometry;
+
+        // these do not update nicely together if shared
+      }
+
+      var guis = {
+        BoxBufferGeometry: function (mesh) {
+          var data = {
+            width: 15,
+            height: 15,
+            depth: 15,
+            widthSegments: 1,
+            heightSegments: 1,
+            depthSegments: 1,
+          };
+
+          function generateGeometry() {
+            updateGroupGeometry(
+              mesh,
+              new BoxBufferGeometry(
+                data.width,
+                data.height,
+                data.depth,
+                data.widthSegments,
+                data.heightSegments,
+                data.depthSegments
+              )
+            );
+          }
+
+          var folder = gui.addFolder("THREE.BoxBufferGeometry");
+
+          folder.add(data, "width", 1, 30).onChange(generateGeometry);
+          folder.add(data, "height", 1, 30).onChange(generateGeometry);
+          folder.add(data, "depth", 1, 30).onChange(generateGeometry);
+          folder
+            .add(data, "widthSegments", 1, 10)
+            .step(1)
+            .onChange(generateGeometry);
+          folder
+            .add(data, "heightSegments", 1, 10)
+            .step(1)
+            .onChange(generateGeometry);
+          folder
+            .add(data, "depthSegments", 1, 10)
+            .step(1)
+            .onChange(generateGeometry);
+
+          generateGeometry();
+        },
+
+        BoxGeometry: function (mesh) {
+          var data = {
+            width: 15,
+            height: 15,
+            depth: 15,
+            widthSegments: 1,
+            heightSegments: 1,
+            depthSegments: 1,
+          };
+
+          function generateGeometry() {
+            updateGroupGeometry(
+              mesh,
+              new BoxGeometry(
+                data.width,
+                data.height,
+                data.depth,
+                data.widthSegments,
+                data.heightSegments,
+                data.depthSegments
+              )
+            );
+          }
+
+          var folder = gui.addFolder("THREE.BoxGeometry");
+
+          folder.add(data, "width", 1, 30).onChange(generateGeometry);
+          folder.add(data, "height", 1, 30).onChange(generateGeometry);
+          folder.add(data, "depth", 1, 30).onChange(generateGeometry);
+          folder
+            .add(data, "widthSegments", 1, 10)
+            .step(1)
+            .onChange(generateGeometry);
+          folder
+            .add(data, "heightSegments", 1, 10)
+            .step(1)
+            .onChange(generateGeometry);
+          folder
+            .add(data, "depthSegments", 1, 10)
+            .step(1)
+            .onChange(generateGeometry);
+
+          generateGeometry();
+        },
+
+        CylinderBufferGeometry: function (mesh) {
+          var data = {
+            radiusTop: 5,
+            radiusBottom: 5,
+            height: 10,
+            radialSegments: 8,
+            heightSegments: 1,
+            openEnded: false,
+            thetaStart: 0,
+            thetaLength: twoPi,
+          };
+
+          function generateGeometry() {
+            updateGroupGeometry(
+              mesh,
+              new CylinderBufferGeometry(
+                data.radiusTop,
+                data.radiusBottom,
+                data.height,
+                data.radialSegments,
+                data.heightSegments,
+                data.openEnded,
+                data.thetaStart,
+                data.thetaLength
+              )
+            );
+          }
+
+          var folder = gui.addFolder("THREE.CylinderBufferGeometry");
+
+          folder.add(data, "radiusTop", 0, 30).onChange(generateGeometry);
+          folder.add(data, "radiusBottom", 0, 30).onChange(generateGeometry);
+          folder.add(data, "height", 1, 50).onChange(generateGeometry);
+          folder
+            .add(data, "radialSegments", 3, 64)
+            .step(1)
+            .onChange(generateGeometry);
+          folder
+            .add(data, "heightSegments", 1, 64)
+            .step(1)
+            .onChange(generateGeometry);
+          folder.add(data, "openEnded").onChange(generateGeometry);
+          folder.add(data, "thetaStart", 0, twoPi).onChange(generateGeometry);
+          folder.add(data, "thetaLength", 0, twoPi).onChange(generateGeometry);
+
+          generateGeometry();
+        },
+
+        CylinderGeometry: function (mesh) {
+          var data = {
+            radiusTop: 5,
+            radiusBottom: 5,
+            height: 10,
+            radialSegments: 8,
+            heightSegments: 1,
+            openEnded: false,
+            thetaStart: 0,
+            thetaLength: twoPi,
+          };
+
+          function generateGeometry() {
+            updateGroupGeometry(
+              mesh,
+              new CylinderGeometry(
+                data.radiusTop,
+                data.radiusBottom,
+                data.height,
+                data.radialSegments,
+                data.heightSegments,
+                data.openEnded,
+                data.thetaStart,
+                data.thetaLength
+              )
+            );
+          }
+
+          var folder = gui.addFolder("THREE.CylinderGeometry");
+
+          folder.add(data, "radiusTop", 1, 30).onChange(generateGeometry);
+          folder.add(data, "radiusBottom", 1, 30).onChange(generateGeometry);
+          folder.add(data, "height", 1, 50).onChange(generateGeometry);
+          folder
+            .add(data, "radialSegments", 3, 64)
+            .step(1)
+            .onChange(generateGeometry);
+          folder
+            .add(data, "heightSegments", 1, 64)
+            .step(1)
+            .onChange(generateGeometry);
+          folder.add(data, "openEnded").onChange(generateGeometry);
+          folder.add(data, "thetaStart", 0, twoPi).onChange(generateGeometry);
+          folder.add(data, "thetaLength", 0, twoPi).onChange(generateGeometry);
+
+          generateGeometry();
+        },
+
+        ConeBufferGeometry: function (mesh) {
+          var data = {
+            radius: 5,
+            height: 10,
+            radialSegments: 8,
+            heightSegments: 1,
+            openEnded: false,
+            thetaStart: 0,
+            thetaLength: twoPi,
+          };
+
+          function generateGeometry() {
+            updateGroupGeometry(
+              mesh,
+              new ConeBufferGeometry(
+                data.radius,
+                data.height,
+                data.radialSegments,
+                data.heightSegments,
+                data.openEnded,
+                data.thetaStart,
+                data.thetaLength
+              )
+            );
+          }
+
+          var folder = gui.addFolder("THREE.ConeBufferGeometry");
+
+          folder.add(data, "radius", 0, 30).onChange(generateGeometry);
+          folder.add(data, "height", 1, 50).onChange(generateGeometry);
+          folder
+            .add(data, "radialSegments", 3, 64)
+            .step(1)
+            .onChange(generateGeometry);
+          folder
+            .add(data, "heightSegments", 1, 64)
+            .step(1)
+            .onChange(generateGeometry);
+          folder.add(data, "openEnded").onChange(generateGeometry);
+          folder.add(data, "thetaStart", 0, twoPi).onChange(generateGeometry);
+          folder.add(data, "thetaLength", 0, twoPi).onChange(generateGeometry);
+
+          generateGeometry();
+        },
+
+        ConeGeometry: function (mesh) {
+          var data = {
+            radius: 5,
+            height: 10,
+            radialSegments: 8,
+            heightSegments: 1,
+            openEnded: false,
+            thetaStart: 0,
+            thetaLength: twoPi,
+          };
+
+          function generateGeometry() {
+            updateGroupGeometry(
+              mesh,
+              new ConeGeometry(
+                data.radius,
+                data.height,
+                data.radialSegments,
+                data.heightSegments,
+                data.openEnded,
+                data.thetaStart,
+                data.thetaLength
+              )
+            );
+          }
+
+          var folder = gui.addFolder("THREE.ConeGeometry");
+
+          folder.add(data, "radius", 0, 30).onChange(generateGeometry);
+          folder.add(data, "height", 1, 50).onChange(generateGeometry);
+          folder
+            .add(data, "radialSegments", 3, 64)
+            .step(1)
+            .onChange(generateGeometry);
+          folder
+            .add(data, "heightSegments", 1, 64)
+            .step(1)
+            .onChange(generateGeometry);
+          folder.add(data, "openEnded").onChange(generateGeometry);
+          folder.add(data, "thetaStart", 0, twoPi).onChange(generateGeometry);
+          folder.add(data, "thetaLength", 0, twoPi).onChange(generateGeometry);
+
+          generateGeometry();
+        },
+
+        CircleBufferGeometry: function (mesh) {
+          var data = {
+            radius: 10,
+            segments: 32,
+            thetaStart: 0,
+            thetaLength: twoPi,
+          };
+
+          function generateGeometry() {
+            updateGroupGeometry(
+              mesh,
+              new CircleBufferGeometry(
+                data.radius,
+                data.segments,
+                data.thetaStart,
+                data.thetaLength
+              )
+            );
+          }
+
+          var folder = gui.addFolder("THREE.CircleBufferGeometry");
+
+          folder.add(data, "radius", 1, 20).onChange(generateGeometry);
+          folder
+            .add(data, "segments", 0, 128)
+            .step(1)
+            .onChange(generateGeometry);
+          folder.add(data, "thetaStart", 0, twoPi).onChange(generateGeometry);
+          folder.add(data, "thetaLength", 0, twoPi).onChange(generateGeometry);
+
+          generateGeometry();
+        },
+      };
+
+      function chooseFromHash(mesh) {
+        var selectedGeometry =
+          window.location.hash.substring(1) || "BoxGeometry";
+
+        if (guis[selectedGeometry] !== undefined) {
+          guis[selectedGeometry](mesh);
+        }
+
+        if (
+          selectedGeometry === "TextGeometry" ||
+          selectedGeometry === "TextBufferGeometry"
+        ) {
+          return { fixed: true };
+        }
+
+        //No configuration options
+        return {};
+      }
+
+      //
+
+      document.getElementById("newWindow").href += window.location.hash;
+
+      var gui = new GUI();
+
+      var scene = new Scene();
+      scene.background = new Color(0x444444);
+
+      var camera = new PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        50
+      );
+      camera.position.z = 30;
+
+      var renderer = new WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      var orbit = new OrbitControls(camera, renderer.domElement);
+      orbit.enableZoom = false;
+
+      var lights = [];
+      lights[0] = new PointLight(0xffffff, 1, 0);
+      lights[1] = new PointLight(0xffffff, 1, 0);
+      lights[2] = new PointLight(0xffffff, 1, 0);
+
+      lights[0].position.set(0, 200, 0);
+      lights[1].position.set(100, 200, 100);
+      lights[2].position.set(-100, -200, -100);
+
+      scene.add(lights[0]);
+      scene.add(lights[1]);
+      scene.add(lights[2]);
+
+      var group = new Group();
+
+      var geometry = new BufferGeometry();
+      geometry.setAttribute("position", new Float32BufferAttribute([], 3));
+
+      var lineMaterial = new LineBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.5,
+      });
+      var meshMaterial = new MeshPhongMaterial({
+        color: 0x156289,
+        emissive: 0x072534,
+        side: DoubleSide,
+        flatShading: true,
+      });
+
+      group.add(new LineSegments(geometry, lineMaterial));
+      group.add(new Mesh(geometry, meshMaterial));
+
+      var options = chooseFromHash(group);
+
+      scene.add(group);
+
+      var render = function () {
+        requestAnimationFrame(render);
+
+        if (!options.fixed) {
+          group.rotation.x += 0.005;
+          group.rotation.y += 0.005;
+        }
+
+        renderer.render(scene, camera);
+      };
+
+      window.addEventListener(
+        "resize",
+        function () {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        },
+        false
+      );
+
+      render();
+    </script>
+  </body>
+</html>

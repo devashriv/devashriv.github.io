@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>CS 590 MAKEMATE V0</title>
+		
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+		<style>
+			body {
+				background-color: #f0f0f0;
+				color: #444;
+			}
+			a {
+				color: #08f;
+			}
+        </style>
+        <script src="../build/three.js"></script>
+        <script src="./vendor/ThreeCSG-1/three-csg.js"></script>
+	</head>
+	<body>
+
+		<div id="info">
+			CSG <br />
+			1. Load cardboard components<br />
+			2. Select CSG operation to be performed<br />
+			3. Export stl of final CSG model
+			</div>
+
+		<script type="module">
+
+			//import * as THREE from '../build/three.module.js';
+			//PLY file loader
+			import { PLYLoader } from './jsm/loaders/PLYLoader.js';
+			//Orbit control
+			import { OrbitControls } from './jsm/controls/OrbitControls.js';
+			//Transform handles
+			import { TransformControls } from './jsm/controls/TransformControls.js';
+			//GUI
+			import { GUI } from './jsm/libs/dat.gui.module.js';
+			//Export to stl for 3D printing
+			import { STLExporter } from './jsm/exporters/STLExporter.js';
+
+			
+			var container;
+			var camera, scene, renderer;
+			var exporter;
+			var group,control,orbit;
+			var objects = [];
+            var cardboards = [];
+            var CSGobjects = [];
+            var CSGresult;
+            var resultCSGmesh;
+
+			var CSG_U_flag=false, CSG_S_flag = false, CSG_I_flag = false;
+			var CSG_count = 0;
+			var CSGobject1= new THREE.Mesh(), CSGobject2 = new THREE.Mesh();
+
+			var mouse = new THREE.Vector2(), raycaster = new THREE.Raycaster();
+			var isShiftDown=false;
+			var firstObj = 0;
+
+			
+			
+			//components
+			//joint objects
+			var m_socket, f_socket, thinge, bhinge, cube; 
+			//links objects
+			var link1, link2;
+			//electronics objects
+			var servo, horn;
+			//cardboard objects
+			var quad, tri, circle;
+
+			//flags
+			var enableSelection = false;
+			var click_counter=0;        //to switch between modes for transform handles
+
+			var msload_flag = false,
+			fsload_flag = false,
+			sload_flag = false,
+			hload_flag = false,
+			thload_flag = false,
+			bhload_flag = false,
+			l1load_flag = false,
+			l2load_flag = false,
+			qload_flag= false,
+			triload_flag=false,
+			circleload_flag=false;
+
+			//main function
+			init();
+			animate();
+			
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				
+				//camera
+				var aspect = window.innerWidth / window.innerHeight;
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 5000 );
+				camera.position.z = 200;
+
+				//scene
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0xf0f0f0 );
+				scene.add( new THREE.AmbientLight( 0x505050 ) );
+				
+				//exporter
+				exporter = new STLExporter();
+
+				//light
+				var light = new THREE.SpotLight( 0xffffff, 1.5 );
+				light.position.set( 0, 500, 2000 );
+				light.angle = Math.PI / 9;
+
+				//shadow
+				light.castShadow = true;
+				light.shadow.camera.near = 1000;
+				light.shadow.camera.far = 4000;
+				light.shadow.mapSize.width = 1024;
+				light.shadow.mapSize.height = 1024;
+
+				scene.add( light );
+
+				//renderer
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.shadowMap.enabled = true;
+				renderer.shadowMap.type = THREE.PCFShadowMap;
+				container.appendChild( renderer.domElement );
+
+				//orbit controls- to pan, zoom, rotate global coordinate system
+				orbit = new OrbitControls( camera, renderer.domElement );
+				orbit.update();
+				orbit.addEventListener( 'change', render );
+
+				//trsnsform controls- to transform component level coordinate system
+				control = new TransformControls( camera, renderer.domElement );
+				control.addEventListener( 'change', render );
+				control.addEventListener( 'dragging-changed', function ( event ) {
+					orbit.enabled = ! event.value;
+				} );
+
+				window.addEventListener( 'resize', onWindowResize, false );
+				window.addEventListener('mousedown', onDocumentMouseDown, false);
+				document.addEventListener( 'keydown', onDocumentKeyDown, false );
+				document.addEventListener( 'keyup', onDocumentKeyUp, false );
+				
+
+				//load GUI
+				displaygui();
+
+			}
+
+
+			function twist(geometry) 
+            {
+				
+                const quaternion = new THREE.Quaternion();
+
+                for (let i = 0; i < geometry.vertices.length; i++) {
+                    // a single vertex Y position
+                    const yPos = geometry.vertices[i].y;
+                    const twistAmount = 10;
+                    const upVec = new THREE.Vector3(0, 1, 0);
+
+                    quaternion.setFromAxisAngle(
+                    upVec, 
+                    (Math.PI / 180) * (yPos / twistAmount)
+                    );
+
+                    geometry.vertices[i].applyQuaternion(quaternion);
+                }
+  
+                // tells Three.js to re-render this mesh
+                geometry.verticesNeedUpdate = true;
+            }
+			
+			//STL export functions
+			function exportASCII(Mesh) {
+
+				var result = exporter.parse( Mesh );
+				saveString( result, "CSG.stl" );
+
+			}
+
+			var link = document.createElement( 'a' );
+			link.style.display = 'none';
+			document.body.appendChild( link );
+
+			function save( blob, filename ) {
+
+				link.href = URL.createObjectURL( blob );
+				link.download = filename;
+				link.click();
+			}
+			
+			function saveString( text, filename ) {
+
+				save( new Blob( [ text ], { type: 'text/plain' } ), filename );
+
+			}
+
+			function saveArrayBuffer( buffer, filename ) {
+
+				save( new Blob( [ buffer ], { type: 'application/octet-stream' } ), filename );
+
+			}
+			
+			function export_all_ASCII ()
+			{
+				for ( var i = 0; i <objects.length; i++)
+				{
+					if (objects[i].type == 'joint' || objects[i].type == 'link')
+					{
+						exportASCII(objects[i]);
+					}
+				}
+            }
+            function exportCSG()
+            {
+                exportASCII(CSGresult);
+            }
+			
+			//GUI
+			function displaygui() 
+			{
+				var gui = new GUI();
+				//set menu items
+				var parameters = 
+				{
+					loadcube: function(){ loadcube();},
+					loadmsocket : function(){ load_msocket(); },
+					loadfsocket : function(){ load_fsocket(); },
+					loadhorn : function(){ load_horn(); },
+					loadservo : function(){ load_servo(); },
+					loadthinge : function () {load_thinge();},
+					loadbhinge : function() { load_bhinge();},
+					loadlink1 : function() { load_link1();},
+					loadlink2 : function(){ load_link2();},
+					loadquad : function() { load_quad();},
+					loadtri : function() { load_tri();},
+					loadcircle : function() { load_circle();},
+					cbquad : function(){ cardboard_quad();},
+					cbtri: function() { cardboard_tri();},
+					cbdisc: function() {cardboard_circle();},
+					exp_ASCII : function () { export_all_ASCII();},
+                    //twister : function () {twist(cube.geometry);}
+                    union: function(){makeUnion();},
+                    subtract: function(){makeSubtract();},
+                    intersect: function(){makeIntersect();},
+                    exp_CSG : function () { exportCSG();}
+				};
+
+				//gui.add(parameters, 'loadcube').name('Cube');
+				
+				/*
+				//joints
+				var joint = gui.addFolder('JOINTS');
+				joint.add(parameters, 'loadmsocket').name('Male Socket');
+				joint.add(parameters, 'loadfsocket').name('Female Socket');
+				joint.add(parameters, 'loadthinge').name('Top Hinge');
+				joint.add(parameters, 'loadbhinge').name('Bottom Hinge');
+				
+				//links
+				var link = gui.addFolder('LINKS');
+				link.add(parameters, 'loadlink1').name('Link 1');
+				link.add(parameters, 'loadlink2').name('Link 2');
+				
+				//electronics
+				var electronics = gui.addFolder('ELECTRONICS');
+				electronics.add(parameters, 'loadhorn').name('Horn');
+				electronics.add(parameters, 'loadservo').name('Servo');
+				
+				//cardboard
+				var cardboard = gui.addFolder('CARDBOARD');
+				cardboard.add(parameters, 'loadquad').name('Quad');
+				cardboard.add(parameters, 'loadtri').name( 'Tri');
+				cardboard.add(parameters, 'loadcircle').name('Circle');
+
+				
+				
+				gui.add(parameters, 'exp_ASCII').name('EXPORT STL');
+				//gui.add(parameters, 'twister').name('CubeTwist');
+				*/
+
+				//cardboard geometries
+				var cardboard = gui.addFolder('CARDBOARD');
+				cardboard.add(parameters, 'cbquad').name('QUAD');
+				cardboard.add(parameters, 'cbtri').name('TRI');
+            	cardboard.add(parameters, 'cbdisc').name('CIRCLE');
+                
+				//CSG funcitons
+				var csg = gui.addFolder('CSG');
+                csg.add(parameters, 'union').name("UNION");
+                csg.add(parameters, 'subtract').name("SUBTRACT");
+                csg.add(parameters, 'intersect').name("INTERSECT");
+                csg.add(parameters, 'exp_CSG').name("EXPORT CSG");
+
+				gui.open();  //default show gui items
+			}
+
+			function onWindowResize() 
+			{
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+				render();
+			}
+
+			function onDocumentMouseDown(event) 
+			{
+				event.preventDefault();
+				
+				//show handles on right click
+				if (event.button == 2)
+				{
+					mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+					mouse.y =  - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+					raycaster.setFromCamera(mouse, camera);
+
+					var intersects = raycaster.intersectObjects(objects, true);
+					
+					if (intersects.length > 0) {
+						part_handles(intersects[0].object);	
+					}
+                }
+                
+                //select surface on left click
+                if (event.button == 0)
+				{
+					mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+					mouse.y =  - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+					raycaster.setFromCamera(mouse, camera);
+					var intersects = raycaster.intersectObjects(objects, true);
+					var material = new THREE.MeshStandardMaterial({ color: 0xff0000, flatShading: true, wireframe:false, vertexColors: THREE.FaceColors });
+						
+					//Union flag true
+					if (CSG_U_flag)
+					{
+						control.detach();
+					if (intersects.length>0)
+					{
+						if (isShiftDown)
+					{
+						if (firstObj == 0)
+						{
+							CSGresult = intersects[0].object;
+							scene.remove( intersects[0].object );
+							objects.splice( objects.indexOf( intersects[0].object ), 1 );
+							firstObj=1;
+							scene.add(CSGresult);
+						}
+						else{
+							scene.remove(CSGresult);
+							CSGresult = threecsg.union(CSGresult, intersects[0].object, material);	
+							scene.remove( intersects[0].object );
+							objects.splice( objects.indexOf( intersects[0].object ), 1 );
+							scene.add(CSGresult);
+							objects.push(CSGresult);
+							CSG_U_flag = false;
+						}
+					}
+					}
+					}
+					//Subtract flag true
+					if (CSG_S_flag)
+					{
+						control.detach();
+					if (intersects.length>0)
+					{
+						if (isShiftDown)
+					{
+						if (firstObj == 0)
+						{
+							CSGresult = intersects[0].object;
+							scene.remove( intersects[0].object );
+							objects.splice( objects.indexOf( intersects[0].object ), 1 );
+							firstObj=1;
+							scene.add(CSGresult);
+						}
+						else{
+							scene.remove(CSGresult);
+							CSGresult = threecsg.subtract(CSGresult, intersects[0].object, material);	
+							scene.remove( intersects[0].object );
+							objects.splice( objects.indexOf( intersects[0].object ), 1 );
+							scene.add(CSGresult);
+							objects.push(CSGresult);
+							CSG_S_flag = false;
+						}
+					}
+					}
+					}
+					//intersect flag true
+					if (CSG_I_flag)
+					{
+						control.detach();
+					if (intersects.length>0)
+					{
+						if (isShiftDown)
+					{
+						if (firstObj == 0)
+						{
+							CSGresult = intersects[0].object;
+							scene.remove( intersects[0].object );
+							objects.splice( objects.indexOf( intersects[0].object ), 1 );
+							firstObj=1;
+							scene.add(CSGresult);
+						}
+						else{
+							scene.remove(CSGresult);
+							CSGresult = threecsg.intersect(CSGresult, intersects[0].object, material);	
+							scene.remove( intersects[0].object );
+							objects.splice( objects.indexOf( intersects[0].object ), 1 );
+							scene.add(CSGresult);
+							objects.push(CSGresult);
+							CSG_I_flag = false;
+						}
+					}
+					}
+					}
+				}
+				
+			}
+	
+			function onDocumentKeyDown( event ) {
+
+				switch ( event.keyCode ) {
+
+					case 16: isShiftDown = true; break;
+
+				}
+
+			}
+
+			function onDocumentKeyUp( event ) {
+
+				switch ( event.keyCode ) {
+
+					case 16: isShiftDown = false; break;
+
+				}
+
+			}
+			//activate handles case to case
+			function part_handles(Mesh) {
+				
+				//female socket mated with male socket has 3DOF XYZ rotation
+				if(Mesh.name == 'f_socket' && Mesh.mate_flag==true)
+				{	
+					//only rotation about XYZ
+					control.showX = true;
+					control.showY = true;
+					control.showZ = true;
+					control.setMode("rotate");
+					control.attach( Mesh );
+					scene.add( control );
+				}
+				
+				//bottom hinge mated with top hinge has 1DOF Z rotation
+				else if(Mesh.name == 'bhinge' && Mesh.mate_flag==true)
+				{
+					//only rotation about Z
+					control.setMode("rotate");
+					control.showX = false;
+					control.showZ = true;
+					control.showY = false;
+					control.attach( Mesh );
+					scene.add( control );
+				}
+				
+				//top hinge joined to any link1 has no DOF							
+				else if(Mesh.name == 'thinge' && Mesh.joint_flag==true)
+				{
+					//no handles
+				}
+				
+				//link1 joined to anything it should become rigid 0 DOF
+				else if(Mesh.name == 'link1' && Mesh.joint_flag==true)
+				{
+					//no handles
+				}
+				
+				//link2 joined to anything it should become rigid 0 DOF
+				else if(Mesh.name == 'link2' && Mesh.joint_flag==true)
+				{
+					//no handles
+				}
+				
+				//horn attached to servo- horn shall only rotate along Y axis
+				else if (Mesh.name == 'horn' && Mesh.mate_flag ==true)
+				{
+					//only rotation about Y
+					control.setMode("rotate");
+					control.showX = false;
+					control.showY = true;
+					control.showZ = false;
+					control.attach( Mesh );
+					scene.add( control );
+				}
+				
+				//cardboard attached to horn- move in XY plane
+				else if(Mesh.type == 'cardboard' && Mesh.joint_flag==true)
+				{
+					click_counter++;
+					control.showX = true;
+					control.showY = true
+					control.showZ = false;
+					control.setMode( "scale");
+					
+					control.attach( Mesh );
+					scene.add( control );
+				}
+				
+				//cardboard accessories-extra control for scaling in X and Y direction
+				else if (Mesh.type == 'cardboard')
+				{
+					click_counter++;
+					control.showX = true;
+					control.showY = true;
+					control.showZ = true;
+	
+					//reset counter
+					if (click_counter>2) click_counter =0;
+					
+					//for cardboard accessory toggle between translate, rotate and scale modes
+					switch (click_counter)
+					{
+					case 0:
+					control.setMode( "rotate" );
+					break;
+					
+					case 1:
+					control.setMode( "translate" );
+					break;
+					
+					case 2:
+					control.showZ = false;
+					control.setMode( "scale");
+					break;
+					}
+					control.attach( Mesh );
+					scene.add( control );
+				}
+				
+				//default show rotate and translate handles
+				else
+				{
+					click_counter++;
+					control.showX = true;
+					control.showY = true;
+					control.showZ = true;
+					
+					//reset counter
+					if (click_counter>1) click_counter =0;
+					
+					switch (click_counter)
+					{
+					case 0:
+					control.setMode( "rotate" );
+					break;
+					
+					case 1:
+					control.setMode( "translate" );
+					break;
+					}
+					control.attach( Mesh );
+					scene.add( control );
+				}		
+			}
+	
+			function animate()
+			{
+				requestAnimationFrame(animate);
+				render();
+			}
+
+			function render() 
+			{	
+				
+				//check collision between male and female socket
+				if (msload_flag==true && fsload_flag==true)
+				{
+					if(m_socket.bb.intersectsBox(f_socket.bb))
+					{	
+						//same position
+						f_socket.position.x = m_socket.position.x;
+						f_socket.position.y = m_socket.position.y;
+						f_socket.position.z = m_socket.position.z;
+						
+						m_socket.mate_flag = true;
+						f_socket.mate_flag = true;
+					}
+				}
+				
+				//check collision between servo and horn
+				if(sload_flag==true && hload_flag==true)
+				{
+					if(horn.bb.intersectsBox(servo.bb))
+					{
+						horn.position.x = servo.position.x;
+						horn.position.y = servo.position.y;
+						horn.position.z = servo.position.z;
+						
+						horn.rotation.x = servo.rotation.x;
+						//horn.rotation.y = servo.rotation.y;
+						horn.rotation.z = servo.rotation.z;
+						
+						servo.mate_flag = true;
+						horn.mate_flag = true;
+					}
+				}
+				
+				//check collision between link1 and female socket
+				if (l1load_flag==true && fsload_flag==true)
+				{
+					if(link1.bb.intersectsBox(f_socket.bb))
+					{
+						//rigid joint : same position, same rotation
+						link1.position.y = f_socket.position.y;
+						link1.position.x = f_socket.position.x;
+						link1.position.z = f_socket.position.z;
+						
+						link1.rotation.x = f_socket.rotation.x;
+						link1.rotation.y = f_socket.rotation.y;
+						link1.rotation.z = f_socket.rotation.z;
+						
+						link1.translateY(14.652+19.9);
+						
+						link1.joint_flag = true;
+						f_socket.joint_flag = true;
+					}
+				}
+				
+				//check collision between cardboard and horn
+				for (var i = 0; i<cardboards.length; i++)
+				{
+					if(cardboards[i].load_flag==true && hload_flag==true)
+					{
+					
+						if(cardboards[i].bb.intersectsBox(horn.bb))
+						{
+						//rigid joint : same position, same rotation
+
+						cardboards[i].position.y = horn.position.y;
+						cardboards[i].position.x = horn.position.x;
+						cardboards[i].position.z = horn.position.z;
+						
+						cardboards[i].rotation.x = horn.rotation.x;
+						cardboards[i].rotation.y = horn.rotation.y;
+						cardboards[i].rotation.z = horn.rotation.z;
+						
+						cardboards[i].rotateX(Math.PI/2);
+						cardboards[i].translateZ(-2.9-3);
+						
+						cardboards[i].joint_flag = true;
+						horn.joint_flag = true;
+						}
+					}
+				}
+				
+				//check collision between link1 and top hinge
+				if (l1load_flag==true && thload_flag==true)
+				{
+					if(link1.bb.intersectsBox(thinge.bb))
+					{
+						//rigid joint : same position, same rotation
+						thinge.position.y = link1.position.y;
+						thinge.position.x = link1.position.x;
+						thinge.position.z = link1.position.z;
+						
+						thinge.rotation.x = link1.rotation.x;
+						thinge.rotation.y = link1.rotation.y;
+						thinge.rotation.z = link1.rotation.z;
+						
+						//transforms to orient
+						thinge.translateY(20+2.5);
+						thinge.translateX(25.48);
+						
+						link1.joint_flag = true;
+						thinge.joint_flag = true;
+					}
+				}
+				
+				//check collision between top and bottom hinge
+				if (thload_flag==true && bhload_flag==true)
+				{
+					if(thinge.bb.intersectsBox(bhinge.bb))
+					{
+						//same position 
+						bhinge.position.y = thinge.position.y;
+						bhinge.position.x = thinge.position.x;
+						bhinge.position.z = thinge.position.z;
+						
+						//same rotation except Z due to 1 DOF in hinge
+						bhinge.rotation.x = thinge.rotation.x;
+						bhinge.rotation.y = thinge.rotation.y;
+						//bhinge.rotation.z = thinge.rotation.z;
+						
+						bhinge.mate_flag=true;
+						thinge.mate_flag=true;
+					}
+				}
+				
+				//check collision between bottom hinge and link2
+				if (bhload_flag==true && l2load_flag==true)
+				{
+					if(link2.bb.intersectsBox(bhinge.bb))
+					{
+						//rigid joint : same position, same rotation
+						link2.position.x = bhinge.position.x;
+						link2.position.y = bhinge.position.y;
+						link2.position.z = bhinge.position.z;
+						
+						link2.rotation.x = bhinge.rotation.x;
+						link2.rotation.y = bhinge.rotation.y;
+						link2.rotation.z = bhinge.rotation.z;
+						
+						//transforms to orient
+						link2.rotateZ(Math.PI);
+						link2.translateY(10);
+						
+						link2.joint_flag = true;
+						bhinge.joint_flag = true;
+					}
+				}
+				
+				//activate bounding boxes
+				for (var i = 0; i <objects.length ; i++)
+				{
+					if (objects[i].load_flag == true)
+					{
+					objects[i].bb.setFromObject(objects[i]);
+					
+					}
+				}
+				
+				renderer.clear();
+				renderer.render( scene, camera );		
+
+			}
+
+			function makeUnion()
+			{
+				firstObj = 0;
+				CSG_U_flag = true;
+				window.alert("Hold shift and click on two parts to join");
+			}
+			
+			function makeUnion4()
+            {
+				var material = new THREE.MeshStandardMaterial({ color: 0xffff66, flatShading: true, wireframe:false, vertexColors: THREE.FaceColors });
+                CSGresult = CSGobjects[0];
+				for(var i =1; i<CSGobjects.length; i++)
+                {
+                    
+                    CSGresult = threecsg.union(CSGresult, CSGobjects[i], material);
+					
+					console.log(i);
+                }
+                scene.add( CSGresult );
+				//objects.push(CSGresult);
+
+				for(var i = 0; i<CSGobjects.length; i++)
+				{
+					scene.remove(CSGobjects[i]);
+				}
+				
+            }
+
+			function makeUnion3()
+			{
+				window.alert("Click on the two objects to join");
+				CSG_flag = true;
+
+				var material = new THREE.MeshStandardMaterial({ color: 0xffff66, flatShading: true, wireframe:false, vertexColors: THREE.FaceColors });
+				if (CSG_count ==2)
+				{
+					//CSGresult = CSGobject1;
+                CSGresult = threecsg.union(CSGobject1, CSGobject2, material);
+                scene.add( CSGresult );
+				scene.remove(CSGobject1);
+				scene.remove(CSGobject2);
+
+				objects.push(CSGresult);
+				CSG_flag=false;
+				CSG_count = 0;
+				}
+			}
+
+			function makeUnion2()
+            {
+                var material = new THREE.MeshStandardMaterial({ color: 0xffff66, flatShading: true, wireframe:false, vertexColors: THREE.FaceColors });
+                for(var i =0; i<objects.length-1; i++)
+                {
+                    CSGresult = objects[i];
+                    CSGresult = threecsg.union(CSGresult, objects[i+1], material);
+                }
+                scene.add( CSGresult );
+				objects.push(CSGresult);
+            }
+
+			function makeSubtract()
+			{
+				firstObj = 0;
+				CSG_S_flag = true;
+				window.alert("Hold shift and click on two parts to subtract");
+			}
+            function makeSubtract1()
+            {
+                var material = new THREE.MeshStandardMaterial({ color: 0xffff66, flatShading: true, wireframe:false, vertexColors: THREE.FaceColors });
+                for(var i =0; i<objects.length-1; i++)
+                {
+                    CSGresult = objects[i];
+                    CSGresult = threecsg.subtract(CSGresult, objects[i+1], material);
+                }
+                scene.add( CSGresult );
+				objects.push(CSGresult);
+            }
+
+			function makeIntersect()
+			{
+				firstObj = 0;
+				CSG_I_flag = true;
+				window.alert("Hold shift and click on two parts to intersect");
+			}
+			function makeIntersect1()
+            {
+                var material = new THREE.MeshStandardMaterial({ color: 0xffff66, flatShading: true, wireframe:false, vertexColors: THREE.FaceColors });
+                for(var i =0; i<objects.length-1; i++)
+                {
+                    CSGresult = objects[i];
+                    CSGresult = threecsg.intersect(CSGresult, objects[i+1], material);
+                }
+                scene.add( CSGresult );
+				objects.push(CSGresult);
+            }
+            //load cube
+			function loadcube()
+			{
+				var geom = new THREE.BoxGeometry(20, 20, 20,2, 2, 2); 
+				geom.computeVertexNormals();
+				//const material = new THREE.MeshNormalMaterial({ wireframe: true }); 
+				var material = new THREE.MeshStandardMaterial({ color: 0xffff66, flatShading: true, wireframe:false, vertexColors: THREE.FaceColors }); 
+				//var material = new THREE.MeshBasicMaterial({color:0xff0ff0, wireframe:false, vertexColors: THREE.FaceColors});
+				//var material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
+				cube = new THREE.Mesh(geom, material); 
+
+				cube.castShadow = true;
+				cube.receiveShadow = true;
+
+                scene.add(cube);
+				objects.push(cube);
+			}
+
+			//load male socket
+			function load_msocket()
+				{
+					var loader = new PLYLoader();
+					loader.load( './models/ply/makemate/joints/Socket Joint Male.ply', function ( geometry ) 
+					{
+						geometry.computeVertexNormals();
+						var material = new THREE.MeshStandardMaterial( { color: 0xffff66, flatShading: true } );
+						//var material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
+						m_socket = new THREE.Mesh( geometry, material );
+						m_socket.name = "m_socket";
+						m_socket.type = "joint";
+						
+						//default position
+						m_socket.position.y = 20;
+						
+						//set up bounding box
+						m_socket.bb = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+						m_socket.bb.setFromObject(m_socket);
+		
+						m_socket.castShadow = true;
+						m_socket.receiveShadow = true;
+			
+						scene.add( m_socket );
+						objects.push( m_socket );
+						
+						//set flags
+						msload_flag = true;
+						m_socket.load_flag = true;
+						m_socket.mate_flag = false;
+						m_socket.joint_flag = false;
+					} );
+				}
+			
+			function load_fsocket()
+				{
+					var loader = new PLYLoader();
+					loader.load( './models/ply/makemate/joints/Socket Joint Female.ply', function ( geometry ) 
+					{
+						geometry.computeVertexNormals();
+
+						var material = new THREE.MeshStandardMaterial( { color: 0xffff66, flatShading: true } );
+						f_socket = new THREE.Mesh( geometry, material );
+						f_socket.name = "f_socket";
+						f_socket.type = "joint";						
+					
+						//default position
+						//f_socket.position.x = - 5;
+						f_socket.position.y = - 40;
+						//f_socket.position.z = - 5;
+						
+						//bounding box
+						f_socket.bb = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+						f_socket.bb.setFromObject(f_socket);
+						
+						f_socket.castShadow = true;
+						f_socket.receiveShadow = true;
+						
+						scene.add( f_socket );
+						objects.push( f_socket );
+						
+						//set flags
+						fsload_flag = true;
+						f_socket.load_flag = true;
+						f_socket.mate_flag = false;
+						f_socket.joint_flag = false;
+					} );
+				}
+			
+			function load_horn()
+				{
+					var loader = new PLYLoader();
+					loader.load( './models/ply/makemate/electronics/horn.ply', function ( geometry ) 
+					{
+						geometry.computeVertexNormals();
+						
+						var material = new THREE.MeshStandardMaterial( { color: 0xffffff, flatShading: true } );
+						horn = new THREE.Mesh( geometry, material );
+						horn.name = "horn";
+						horn.type = "electronics";
+						
+						//default position
+						horn.position.x = - 20;
+						horn.position.y = - 40;
+						//horn.position.z = - 5;
+						//horn.rotation.z=  Math.PI;
+						
+						//bounding box
+						horn.bb = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+						horn.bb.setFromObject(horn);
+
+						horn.castShadow = true;
+						horn.receiveShadow = true;
+						
+						scene.add( horn );
+						objects.push( horn );
+
+						//set flags
+						hload_flag = true;
+						horn.load_flag = true;
+						horn.mate_flag = false;
+						horn.joint_flag = false;
+					} );
+				}
+			
+			function load_servo()
+				{
+					var loader = new PLYLoader();
+					loader.load( './models/ply/makemate/electronics/servo.ply', function ( geometry ) 
+					{
+						geometry.computeVertexNormals();
+						
+						var material = new THREE.MeshStandardMaterial( { color: 0x0055ff, flatShading: true } );
+						servo = new THREE.Mesh( geometry, material );
+						servo.name = "servo";
+						servo.type = "electronics";
+				
+						//bounding box
+						servo.bb = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+						servo.bb.setFromObject(servo);
+						
+						//default position
+						servo.position.x = - 20;
+						
+						servo.castShadow = true;
+						servo.receiveShadow = true;
+						
+						scene.add( servo );
+						objects.push( servo );
+						
+						//set flags
+						sload_flag = true;
+						servo.load_flag = true;
+						servo.mate_flag = false;
+						servo.joint_flag = false;
+					} );
+				}
+	
+			function load_thinge()
+				{
+					var loader = new PLYLoader();
+					loader.load( './models/ply/makemate/joints/Top Hinge Joint.ply', function ( geometry ) 
+					{
+						geometry.computeVertexNormals();
+						
+						var material = new THREE.MeshStandardMaterial( { color: 0xffff66, flatShading: true } );
+						thinge = new THREE.Mesh( geometry, material );
+						thinge.name = "thinge";
+						thinge.type = "joint"
+						
+						//default position
+						thinge.position.y = 20;
+						
+						//bounding box
+						thinge.bb = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+						thinge.bb.setFromObject(thinge);
+				
+						thinge.castShadow = true;
+						thinge.receiveShadow = true;
+
+						scene.add( thinge );
+						objects.push( thinge );
+							
+						//set flags
+						thload_flag = true;
+						thinge.load_flag = true;
+						thinge.mate_flag = false;
+						thinge.joint_flag = false;
+					} );
+				}
+		
+			function load_bhinge()
+				{
+					var loader = new PLYLoader();
+					loader.load( './models/ply/makemate/joints/Bottom Hinge Joint.ply', function ( geometry ) 
+					{
+						geometry.computeVertexNormals();
+							
+						var material = new THREE.MeshStandardMaterial( { color: 0xffff66, flatShading: true } );
+						bhinge = new THREE.Mesh( geometry, material );
+						bhinge.name = "bhinge";
+						bhinge.type = "joint";
+						
+						//default position
+						bhinge.position.y = 20;
+						
+						//bounding box
+						bhinge.bb = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+						bhinge.bb.setFromObject(bhinge);
+	
+						bhinge.castShadow = true;
+						bhinge.receiveShadow = true;
+
+						scene.add( bhinge );
+						objects.push( bhinge );
+							
+						//set flags
+						bhload_flag = true;
+						bhinge.load_flag= true;
+						bhinge.mate_flag = false;
+						bhinge.joint_flag = false;
+					} );
+				}
+		
+			function load_link1()
+				{
+					var loader = new PLYLoader();
+					loader.load( './models/ply/makemate/links/link1.ply', function ( geometry ) 
+					{
+						geometry.computeVertexNormals();
+						
+						var material = new THREE.MeshStandardMaterial( { color: 0x666fff, flatShading: true } );
+						link1 = new THREE.Mesh( geometry, material );
+						link1.name = "link1";
+						link1.type = "link"
+						
+						//default position
+						link1.position.y = 20;
+						
+						//bounding box
+						link1.bb = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+						link1.bb.setFromObject(link1);
+					
+						link1.castShadow = true;
+						link1.receiveShadow = true;
+
+						scene.add( link1 );
+						objects.push( link1 );
+						
+						//set flags
+						l1load_flag = true;
+						link1.load_flag = true;
+						link1.mate_flag = false;
+						link1.joint_flag = false;
+					} );
+				}
+		
+			function load_link2()
+				{
+					var loader = new PLYLoader();
+					loader.load( './models/ply/makemate/links/link2.ply', function ( geometry ) 
+					{
+						geometry.computeVertexNormals();
+						
+						var material = new THREE.MeshStandardMaterial( { color: 0x666fff, flatShading: true } );
+						link2 = new THREE.Mesh( geometry, material );
+						link2.name = "link2";
+						link2.type = "link";
+						
+						//default position
+						link2.position.y = 20;
+						
+						//boinding box
+						link2.bb = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+						link2.bb.setFromObject(link2);
+					
+						link2.castShadow = true;
+						link2.receiveShadow = true;
+
+						scene.add( link2 );
+						objects.push( link2 );
+							
+						//set flags
+						l2load_flag = true;
+						link2.load_flag = true;
+						link2.mate_flag = false;
+						link2.joint_flag = false;
+					} );
+				}
+				
+				function load_quad()
+				{
+					var loader = new PLYLoader();
+					loader.load( './models/ply/makemate/cardboard/square40.ply', function ( geometry ) 
+					{
+						geometry.computeVertexNormals();
+						
+						var material = new THREE.MeshStandardMaterial( { color: 0x866b00, flatShading: true } );
+						quad = new THREE.Mesh( geometry, material );
+						quad.name = "quad";
+						quad.type = "cardboard";
+						
+						//default position
+						quad.position.y = 20;
+						
+						//boinding box
+						quad.bb = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+						quad.bb.setFromObject(quad);
+					
+						quad.castShadow = true;
+						quad.receiveShadow = true;
+
+						scene.add( quad);
+						objects.push( quad);
+						cardboards.push(quad);
+							
+						//set flags
+						qload_flag = true;
+						quad.load_flag = true;
+						quad.mate_flag = false;
+						quad.joint_flag = false;
+
+					} );
+				}
+				
+				function load_tri()
+				{
+					var loader = new PLYLoader();
+					loader.load( './models/ply/makemate/cardboard/equitri40.ply', function ( geometry ) 
+					{
+						geometry.computeVertexNormals();
+						
+						var material = new THREE.MeshStandardMaterial( { color: 0x866b00, flatShading: true } );
+						tri = new THREE.Mesh( geometry, material );
+						tri.name = "tri";
+						tri.type = "cardboard";
+						
+						//default position
+						tri.position.y = 20;
+						
+						//boinding box
+						tri.bb = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+						tri.bb.setFromObject(tri);
+						
+						tri.castShadow = true;
+						tri.receiveShadow = true;
+
+						scene.add( tri);
+						objects.push( tri);
+						cardboards.push(tri);
+							
+						//set flags
+						triload_flag = true;
+						tri.load_flag = true;
+						tri.mate_flag = false;
+						tri.joint_flag = false;
+					} );
+				}
+				
+				function load_circle()
+				{
+					var loader = new PLYLoader();
+					loader.load( './models/ply/makemate/cardboard/circle40.ply', function ( geometry ) 
+					{
+						geometry.computeVertexNormals();
+						
+						var material = new THREE.MeshStandardMaterial( { color: 0x866b00, flatShading: true } );
+						circle = new THREE.Mesh( geometry, material );
+						circle.name = "circle";
+						circle.type = "cardboard";
+						
+						//default position
+						circle.position.y = 20;
+						
+						//boinding box
+						circle.bb = new THREE.Box3(new THREE.Vector3(), new THREE.Vector3());
+						circle.bb.setFromObject(circle);
+						
+						circle.castShadow = true;
+						circle.receiveShadow = true;
+
+						scene.add(circle);
+						objects.push(circle);
+						cardboards.push(circle);
+							
+						//set flags
+						circleload_flag = true;
+						circle.load_flag = true;
+						circle.mate_flag = false;
+						circle.joint_flag = false;
+					} );
+				}
+
+				function cardboard_quad()
+			{
+				//20x20x3 mm cardboard primitive
+				var geom = new THREE.BoxGeometry(20, 20, 3 ,1, 1, 1); 
+				geom.computeVertexNormals();
+				//const material = new THREE.MeshNormalMaterial({ wireframe: true }); 
+				var material = new THREE.MeshStandardMaterial({ color: 0xffff66, flatShading: true, wireframe:false, vertexColors: THREE.FaceColors }); 
+				//var material = new THREE.MeshBasicMaterial({color:0xff0ff0, wireframe:false, vertexColors: THREE.FaceColors});
+				//var material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
+				quad = new THREE.Mesh(geom, material); 
+
+				quad.castShadow = true;
+				quad.receiveShadow = true;
+				quad.type = "cardboard";
+
+                scene.add(quad);
+				objects.push(quad);
+                cardboards.push(quad);
+                
+			}
+
+			function cardboard_tri()
+			{
+				var length = 12, width = 8;
+
+				var shape = new THREE.Shape();
+				shape.moveTo( -10,0 );
+				shape.lineTo( 10,0 );
+				shape.lineTo( 0,10);
+				shape.lineTo( -10,0);
+
+				var extrudeSettings = {
+					steps: 1,
+					depth: 3,
+					bevelEnabled: false,
+					//bevelThickness: 1,
+					//bevelSize: 1,
+					//bevelOffset: 0,
+					//bevelSegments: 1
+				};
+
+				var geometry = new THREE.ExtrudeGeometry( shape, extrudeSettings );
+				var material = new THREE.MeshStandardMaterial({ color: 0xffff66, flatShading: true, wireframe:false, vertexColors: THREE.FaceColors });
+				var tri = new THREE.Mesh( geometry, material ) ;
+
+				tri.castShadow = true;
+				tri.receiveShadow = true;
+				tri.type = "cardboard";
+
+				scene.add( tri );
+				objects.push(tri);
+                cardboards.push(tri);
+
+			}
+
+			function cardboard_circle()
+			{
+				//20x20x3 mm cardboard primitive
+				var geom = new THREE.CylinderGeometry(10, 10, 3, 32); 
+				geom.rotateX(Math.PI / 2);
+
+				geom.computeVertexNormals();
+				//const material = new THREE.MeshNormalMaterial({ wireframe: true }); 
+				var material = new THREE.MeshStandardMaterial({ color: 0xffff66, flatShading: true, wireframe:false, vertexColors: THREE.FaceColors }); 
+				//var material = new THREE.MeshBasicMaterial({color:0xff0ff0, wireframe:false, vertexColors: THREE.FaceColors});
+				//var material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
+				var disc = new THREE.Mesh(geom, material); 
+
+				disc.castShadow = true;
+				disc.receiveShadow = true;
+				disc.type = "cardboard";
+
+                scene.add(disc);
+				objects.push(disc);
+                cardboards.push(disc);
+
+			}
+		
+		</script>
+
+	</body>
+</html>

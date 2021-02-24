@@ -1,0 +1,11 @@
+.relative {
+    position: relative;
+}
+.absolute {
+    position: absolute;
+}
+.hidden {
+    /* The menu is hidden at first */
+    display: none;
+}
+
