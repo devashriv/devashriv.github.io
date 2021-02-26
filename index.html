@@ -1,109 +1,102 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-	<title>DeeVagholkar</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-	<!--<link type="text/css" rel="stylesheet" href="makemate/main.css">-->
-	<style>
-		body {
-			background-color: #f0f0f0;
-			color: #444;
-		}
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+        integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
 
-		a {
-			color: #08f;
-		}
-	</style>
+    <title>Hello, world!</title>
 </head>
 
 <body>
 
-	<h2>Minecraft Modeller</h2>
-	<a href="examples/minecraft.html">Try it!</a>
-	<a href="https://www.youtube.com/watch?v=pFCn3ZnPYkE&t=30s&ab_channel=DevashriV">Watch video</a>
-	<div id="info">
-		Place cubes to create objects- download stl of final object<br />
-		Status: completed<br />
-		Improvements: implement continuous cube placing brush, select planes and draw line- lines are converted in a
-		pattern of cubes <br />
-	</div>
-	<br />
+    <!-- MAIN (Center website) -->
+    <div class="main">
 
-	<a href="examples/hand_spread.html">Hand parametric model and its subdivision</a>
-	<div id="info">
-		Click on the screen to load hand. Move the subdivision slider for smoother hand surface<br />
-		Status: completed<br />
-	</div>
-	<br />
 
-	<a href="examples/geom-edit.html">Deform geometries</a>
-	<div id="info">
-		Twist existing meshes<br />
-		Status: completed<br />
-		Improvements: add feature to select an edge or vertex and pull it <br />
-	</div>
-	<br />
+        <div class="container">
+            <!-- Content here -->
+            <h1>Dee's Workspace</h1>
+            <hr>
 
-	<a href="examples/three-csg-test-1.html">CSG operations 1</a>
-	<div id="info">
-		Perform CSG operations- Union, Subtract, Intersect on primitive shapes<br />
-		Status: completed<br />
-		Improvements: remove bugs<br />
-	</div>
-	<br />
+            <h2>Welcome to my workspace</h2>
+            <p>I am a mechanical engineering grad student passionate about design and computation.
+                Here are a few of my geometry and CAD related projects based on the three.js library.
+                Peep into my <a href="https://github.com/devashriv" target="_blank">Github</a> or <a
+                    href="https://www.linkedin.com/in/devashri-vagholkar/" target="_blank">LinkedIn</a> to learn more
+                about my work.
+                I enjoy building things and here is my <a href="https://issuu.com/devashriv/docs/portfolio"
+                    target="_blank">Portfolio</a>
+                that documents my other projects.
+            </p>
+            <div class="card-group">
+                <div class="card">
+                    <img src="./images/minecraft.png" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Minecraft Modeler</h5>
+                        <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This card has even longer content than the first to show that equal
+                            height
+                            action.</p>
+                        <a href="examples/minecraft.html" target="_blank" class="card-link">Try It</a>
+                        <a href="https://www.youtube.com/watch?v=pFCn3ZnPYkE&t=30s&ab_channel=DevashriV" target="_blank"
+                            class="card-link">Watch video</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="./images/hand-para.png" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Parametric hand & Surface subdivision</h5>
+                        <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This card has even longer content than the first to show that equal
+                            height
+                            action.</p>
+                        <a href="examples/hand_spread.html" target="_blank" class="card-link">Try It</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="./images/csg.png" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">CSG operations</h5>
+                        <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This card has even longer content than the first to show that equal
+                            height
+                            action.</p>
+                        <a href="examples/three-csg-test-1.html" target="_blank" class="card-link">Try It</a>
+                    </div>
+                </div>
+                <div class="card">
+                    <img src="./images/face-sel.png" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Face selection</h5>
+                        <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
+                            additional content. This card has even longer content than the first to show that equal
+                            height
+                            action.</p>
+                        <a href="examples/face-selector.html" target="_blank" class="card-link">Try It</a>
+                    </div>
+                </div>
 
-	<a href="examples/face-selector.html">Face selector</a>
-	<div id="info">
-		Selects a triangular face of the mesh<br />
-		Status:completed
-	</div>
-	<br />
 
-	<a href="examples/surface-selector-geom.html">surface selector geometries</a>
-	<div id="info">
-		Select surface of a mesh. Check all triangular faces of the mesh. All faces with same normal shall
-		highlight<br />
-		*only selects surface of default three.js geometries not for exported objects<br />
-		Status: completed<br />
-		Improvement: selection of circular edge- angle between normals should be withing a threshold angle<br />
-	</div>
-	<br />
+            </div>
+        </div>
 
-	<a href="examples/surface-selector-obj.html">surface selector obj</a>
-	<div id="info">
-		Selects surface of a mesh (same as above) works for exported objects<br />
-		Status: WIP
-	</div>
-
-	<a href="examples/cardboard-primitives.html">Cardboard primitives</a>
-	<div id="info">
-		Loads cardboard primitive shapes using default geometries
-		Status: completed
-	</div>
-	<br />
-
-	<a href="examples/merge-geom.html">Merge geometries</a>
-	<div id="info">
-		Merge multiple meshes to create one single mesh that can be exported as a single stl file
-		Status: completed
-	</div>
-	<br />
-
-	<a href="examples/obj-loader.html">obj loader</a>
-	<div id="info">
-		Load .obj files
-	</div>
-	<br />
-
-	<a href="examples/obj-loader-2.html">obj loader 2</a>
-	<div id="info">
-		Load .obj files
-	</div>
-	<br />
-
+        <!-- END MAIN -->
+    </div>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+        integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
+        integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+        crossorigin="anonymous"></script>
 
 </body>
 
