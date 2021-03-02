@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Breadth First Search</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <link type="text/css" rel="stylesheet" href="main.css">
+    <style>
+        body {
+            background-color: #f0f0f0;
+            color: #444;
+        }
+
+        a {
+            color: #08f;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="info">
+    </div>
+
+    <script type="module">
+
+        import * as THREE from '../build/three.module.js';
+        //PLY file loader
+        import { PLYLoader } from './jsm/loaders/PLYLoader.js';
+        //Orbit control
+        import { OrbitControls } from './jsm/controls/OrbitControls.js';
+        //Transform handles
+        import { TransformControls } from './jsm/controls/TransformControls.js';
+        //GUI
+        import { GUI } from './jsm/libs/dat.gui.module.js';
+        //OBJ loader
+        import { OBJLoader2 } from './jsm/loaders/OBJLoader2.js';
+
+
+        var container;
+        var camera, scene, renderer;
+        var exporter;
+        var group, control, orbit;
+        var objects = [];
+        var cardboards = [];
+
+        var mouse = new THREE.Vector2(), raycaster = new THREE.Raycaster();
+
+        var hand;
+
+        //flags
+        var enableSelection = false;
+        var click_counter = 0;        //to switch between modes for transform handles
+
+        var square_flag = false;
+
+        var clickedFaces = [];
+        //main function
+        init();
+        animate();
+
+        function init() {
+
+            container = document.createElement('div');
+            document.body.appendChild(container);
+
+            //camera
+            var aspect = window.innerWidth / window.innerHeight;
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 5000);
+            camera.position.z = 50;
+
+            //scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf0f0f0);
+            scene.add(new THREE.AmbientLight(0x505050));
+
+            //light
+            var light = new THREE.SpotLight(0xffffff, 1.5);
+            light.position.set(0, 5000, 0);
+            light.angle = Math.PI / 9;
+
+            //shadow
+            light.castShadow = true;
+            light.shadow.camera.near = 1000;
+            light.shadow.camera.far = 4000;
+            light.shadow.mapSize.width = 1024;
+            light.shadow.mapSize.height = 1024;
+
+            scene.add(light);
+
+            //renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFShadowMap;
+            container.appendChild(renderer.domElement);
+
+            //orbit controls- to pan, zoom, rotate global coordinate system
+            orbit = new OrbitControls(camera, renderer.domElement);
+            orbit.update();
+            orbit.addEventListener('change', render);
+
+            //trsnsform controls- to transform component level coordinate system
+            control = new TransformControls(camera, renderer.domElement);
+            control.addEventListener('change', render);
+            control.addEventListener('dragging-changed', function (event) {
+                orbit.enabled = !event.value;
+            });
+
+            window.addEventListener('resize', onWindowResize, false);
+            window.addEventListener('mousedown', onDocumentMouseDown, false);
+
+            //load GUI
+            displaygui();
+
+            //load geometry
+
+
+        }
+
+        //GUI
+        function displaygui() {
+            var gui = new GUI();
+            //set menu items
+            var parameters =
+            {
+                loadply: function () { load_ply(); },
+                square_flag: false,
+            };
+
+            gui.add(parameters, 'loadply').name('Load Geometry');
+
+            gui.open();  //default show gui items
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            render();
+        }
+
+        function onDocumentMouseDown(event) {
+            event.preventDefault();
+
+            //show handles on right click
+            if (event.button == 2) {
+                showHandles();
+            }
+
+            //select surface on left click
+            if (event.button == 0) {
+                //highlightFaceGeometry();
+                //highlightFaceObj();
+                highlightFacePly();
+            }
+
+        }
+
+        function showHandles() {
+            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+            mouse.y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            var intersects = raycaster.intersectObjects(objects, true);
+
+            if (intersects.length > 0) {
+                part_handles(intersects[0].object);
+            }
+        }
+
+        //highlight face square or triangle
+        function highlightFaceGeometry() {
+            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+            mouse.y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            var intersects = raycaster.intersectObjects(objects, true);
+            console.log(intersects[0]);
+            if (intersects.length > 0) {
+                var faceIndex = intersects[0].faceIndex;
+
+                if (square_flag == true) {
+                    if (faceIndex == 0 || (faceIndex % 2) == 0) {
+                        intersects[0].object.geometry.faces[faceIndex].color.setHex(0xFF0000);
+                        intersects[0].object.geometry.faces[faceIndex + 1].color.setHex(0xFF0000);
+                        intersects[0].object.geometry.colorsNeedUpdate = true;
+                        console.log(square_flag);
+
+                    }
+                    else {
+                        intersects[0].object.geometry.faces[faceIndex].color.setHex(0xFF0000);
+                        intersects[0].object.geometry.faces[faceIndex - 1].color.setHex(0xFF0000);
+                        intersects[0].object.geometry.colorsNeedUpdate = true;
+                        console.log(square_flag);
+                    }
+                }
+
+                else {
+                    intersects[0].object.geometry.faces[faceIndex].color.setHex(0xFF0000);
+                    intersects[0].object.geometry.colorsNeedUpdate = true;
+                    console.log(square_flag);
+                }
+
+            }
+
+        }
+
+        //highlight face of obj
+        function highlightFaceObj() {
+            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+            mouse.y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            var intersects = raycaster.intersectObjects(objects, true);
+            if (intersects.length > 0) {
+                var faceIndex = intersects[0].object.geometry;
+                var a = intersects[0].face.a;
+                var b = intersects[0].face.b;
+                var c = intersects[0].face.c;
+
+                console.log(a + "," + b + "," + c);
+                console.log(intersects[0].object.geometry.attributes.position.array[3 * a]); //x coordinate of a vertex of clicked face
+                console.log(intersects[0].object.geometry.attributes.position.array[3 * a + 1]);//y coordinate of a vertex of clicked face
+                console.log(intersects[0].object.geometry.attributes.position.array[3 * a + 2]);//z coordinate of a vertex of clicked face
+                //intersects[0].face.color.setHex(0xFF0000);
+                //intersects[0].object.material.color = { r: 0, g: 1, b: 0 };
+                intersects[0].object.geometry.attributes.color.array[a * 3] = 1;
+                intersects[0].object.geometry.attributes.color.array[b * 3] = 1;
+                intersects[0].object.geometry.attributes.color.array[c * 3] = 1;
+
+                //intersects[0].face.color.needsUpdate = true;
+                intersects[0].object.geometry.attributes.color.needsUpdate = true;
+                console.log(intersects[0])
+            }
+        }
+
+        function highlightFacePly() {
+            mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+            mouse.y = - (event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+
+            var intersects = raycaster.intersectObjects(objects, true);
+            if (intersects.length > 0) {
+                console.log(intersects[0]);
+            }
+
+
+            // Color the clicked face blue
+            if (intersects.length > 0) {
+                clickedFaces.push(intersects[0].face);
+                intersects[0].face.color.set("blue");
+                intersects[0].object.geometry.colorsNeedUpdate = true;
+                console.log(clickedFaces);
+            };
+
+            // Draw a polygon segment between last two clicked faces
+            if (clickedFaces.length > 1) {
+                bfs(...clickedFaces.slice(-2)); //last two clicked faces-start and end point
+                let familyLine = [];
+                traverseParents(clickedFaces.slice(-1)[0], familyLine);//end point
+                familyLine.forEach(function (face) {
+                    face.color.set("red");
+                    intersects[0].object.geometry.colorsNeedUpdate = true;
+                })
+            };
+
+        }
+
+        function bfs(source, destination) {
+            // TODO this leaves parent on each mesh.geometry.face. Kinda bad since they are specific to src & dst
+            let S = new Set([source]);
+            console.log(S);
+            let Q = [];
+            Q.push(source);
+            //console.log(Q);
+            while (Q.length > 0) {
+                renderer.render(scene, camera);
+                let current = Q.shift(); //first element in Q. it is also deleted now
+                if (current == destination) {
+                    return current;
+                }
+                current.connectedFaces.forEach(function (face) {
+                    if (!S.has(face)) {
+                        S.add(face);
+                        //face.color.setHSL(0.5, S.size / 200 % 1, 0.5);
+                        //objects[0].geometry.colorsNeedUpdate = true;
+                        face.parent = current;
+                        Q.push(face);
+                    }
+                });
+            }
+        }
+
+        function traverseParents(face, familyLine) {
+            var familyLine = familyLine || [];
+            familyLine.push(face);
+            if (face.hasOwnProperty('parent')) {
+                traverseParents(face.parent, familyLine)
+            }
+        }
+        //activate handles case to case
+        function part_handles(Mesh) {
+
+            click_counter++;
+            control.showX = true;
+            control.showY = true;
+            control.showZ = true;
+
+            //reset counter
+            if (click_counter > 1) click_counter = 0;
+
+            switch (click_counter) {
+                case 0:
+                    control.setMode("rotate");
+                    break;
+
+                case 1:
+                    control.setMode("translate");
+                    break;
+            }
+            control.attach(Mesh);
+            scene.add(control);
+
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            render();
+        }
+
+        function render() {
+
+            renderer.clear();
+            renderer.render(scene, camera);
+
+        }
+
+        //looad hand.ply
+        function load_ply() {
+            var PLYloader = new PLYLoader();
+            PLYloader.load('./models/ply/HAND.PLY', function (bufferGeometry) {
+                // use normal geom instead of buffergeometry b/c easier to color faces
+                //geometry.computeVertexNormals();
+                //console.log(bufferGeometry);
+                let geometry = new THREE.Geometry().fromBufferGeometry(bufferGeometry);
+                //console.log(geometry);
+                geometry.computeVertexNormals();
+                const material = new THREE.MeshPhongMaterial({
+                    color: "yellow",
+                    vertexColors: THREE.FaceColors,
+                    side: THREE.DoubleSide
+                });
+                var mesh = new THREE.Mesh(geometry, material);
+                scene.add(mesh);
+                //addAdjacencyDataToFaces(mesh.geometry);
+                //render()
+                objects.push(mesh);
+                addAdjacencyDataToFaces(mesh.geometry);
+            });
+        }
+
+
+        function addAdjacencyDataToFaces(geom) {
+            // Create an array of sets, one for each vertex, to store what faces each vertex is connected to
+            // To do that, wse every single ES6 feature in a single line. Woah nelly
+            //console.log(geom);
+            let val = Array(geom.vertices.length).keys();
+            let verticesWithAdjFaces = [...Array(geom.vertices.length).keys()].map(i => new Set());
+            //console.log(verticesWithAdjFaces);
+            //console.log(geom.faces);
+            for (let face of geom.faces) {
+                face.connectedFaces = new Set();
+            }
+            for (let face of geom.faces) {
+                for (let vertex of [face.a, face.b, face.c]) {
+                    verticesWithAdjFaces[vertex].add(face);
+                }
+            }
+
+            for (let vertexFaces of verticesWithAdjFaces) {
+                for (let face of vertexFaces) {
+                    // Might be more efficient to deduplicate at the end?
+                    //face.connectedFaces = face.connectedFaces.union(vertexFaces);
+
+                    face.connectedFaces = union(face.connectedFaces, vertexFaces);
+                    //console.log(face.connectedFaces);
+
+                    // Don't keep link to self
+
+                    //var index = face.connectedFaces.indexOf(face);
+                    //face.connectedFaces.splice(index, 1);
+                    //console.log(face.connectedFaces);
+                    face.connectedFaces.delete(face);
+
+                }
+            }
+            //console.log(geom);
+            //console.log(verticesWithAdjFaces);
+        }
+
+        function union(setA, setB) {
+            let _union = new Set(setA)
+            for (let elem of setB) {
+                _union.add(elem)
+            }
+            return _union
+        }
+
+        function union_arrays(x, y) {
+            var obj = {};
+            for (var i = x.length - 1; i >= 0; --i)
+                obj[x[i]] = x[i];
+            for (var i = y.length - 1; i >= 0; --i)
+                obj[y[i]] = y[i];
+            var res = []
+            for (var k in obj) {
+                if (obj.hasOwnProperty(k))  // <-- optional
+                    res.push(obj[k]);
+            }
+            return res;
+        }
+    </script>
+
+
+</body>
+
+</html>
