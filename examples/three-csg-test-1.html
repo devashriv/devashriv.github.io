@@ -26,8 +26,8 @@
 	<div id="info">
 		CSG <br />
 		1. Load cardboard components<br />
-		2. Right click components to move or rotate<br />
-		3. Select CSG operation to be performed<br />
+		2. Right click components to move, right click again to scale and rotate<br />
+		3. Select CSG operation to be performed from the menu<br />
 		4. Hold Shift key and click on two components <br />
 		5. Export stl of final CSG model
 	</div>
@@ -1195,6 +1195,7 @@
 			tri.castShadow = true;
 			tri.receiveShadow = true;
 			tri.type = "cardboard";
+			tri.position.x = -50;
 
 			scene.add(tri);
 			objects.push(tri);
@@ -1206,17 +1207,16 @@
 			//20x20x3 mm cardboard primitive
 			var geom = new THREE.CylinderGeometry(10, 10, 3, 32);
 			geom.rotateX(Math.PI / 2);
-
 			geom.computeVertexNormals();
 			//const material = new THREE.MeshNormalMaterial({ wireframe: true }); 
 			var material = new THREE.MeshStandardMaterial({ color: 0xffff66, flatShading: true, wireframe: false, vertexColors: THREE.FaceColors });
 			//var material = new THREE.MeshBasicMaterial({color:0xff0ff0, wireframe:false, vertexColors: THREE.FaceColors});
 			//var material = new THREE.MeshBasicMaterial({ vertexColors: THREE.VertexColors });
 			var disc = new THREE.Mesh(geom, material);
-
 			disc.castShadow = true;
 			disc.receiveShadow = true;
 			disc.type = "cardboard";
+			disc.position.x = 50;
 
 			scene.add(disc);
 			objects.push(disc);
