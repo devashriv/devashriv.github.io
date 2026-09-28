@@ -1,13 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta property="og:image" content="deesworkspace-banner.png" />
 
-    <!--favicon related-->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -15,11 +13,12 @@
     <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
-    <!-- Bootstrap CSS -->
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
         integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.8.2/css/lightbox.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.8.2/js/lightbox.min.js"></script>
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/site.css">
+
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
         integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
         crossorigin="anonymous"></script>
@@ -29,558 +28,100 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
         integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
         crossorigin="anonymous"></script>
+    <script src="content/projects.js"></script>
+    <script src="scripts/main.js"></script>
 
-    <style>
-        body {
-            position: relative;
-        }
-
-        .lightbox-gallery {
-            background-image: linear-gradient(#4A148C, #E53935);
-            background-repeat: no-repeat;
-            color: #000;
-            overflow-x: hidden
-        }
-
-        .lightbox-gallery p {
-            color: #fff
-        }
-
-        .lightbox-gallery h2 {
-            font-weight: bold;
-            margin-bottom: 40px;
-            padding-top: 40px;
-            color: #fff
-        }
-
-        @media (max-width:767px) {
-            .lightbox-gallery h2 {
-                margin-bottom: 25px;
-                padding-top: 25px;
-                font-size: 24px
-            }
-        }
-
-        .lightbox-gallery .intro {
-            font-size: 16px;
-            max-width: 500px;
-            margin: 0 auto 40px
-        }
-
-        .lightbox-gallery .intro p {
-            margin-bottom: 0
-        }
-
-        .lightbox-gallery .photos {
-            padding-bottom: 20px
-        }
-
-        .lightbox-gallery .item {
-            padding-bottom: 30px
-        }
-    </style>
     <title>Dee's Workspace</title>
 </head>
 
-<body data-spy="scroll" data-target=".navbar" data-offset="50">
+<body class="page-shell" data-spy="scroll" data-target=".navbar" data-offset="50">
     <div class="container">
-        <nav class="navbar sticky-top navbar-light bg-light">
-            <a class="navbar-brand" href="#"><img src="images/dw1.png" height="30" alt=""></a>
-            <ul class="nav nav-pills">
-                <li class="nav-item">
-                    <a class="nav-link" href="#Code"><img src="images/button.png" height="30" alt="">Code</a>
+        <nav class="site-nav" aria-label="Main navigation">
+            <a class="navbar-brand" href="#top" aria-label="Home">
+                <img src="images/dw1.png" alt="Dee's Workspace logo">
+            </a>
+            <ul class="nav-pills">
+                <li>
+                    <a class="nav-link" href="#featured"><img src="images/button.png" alt="">Featured</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#Things"><img src="images/button.png" height="30"
-                            alt="">Things</a>
+                <li>
+                    <a class="nav-link" href="#code"><img src="images/button.png" alt="">Code</a>
                 </li>
-                <!--li class="nav-item">
-                    <a class="nav-link" href="#Design"><img src="images/button.png" height="30">Design</a>
-                </li-->
+                <li>
+                    <a class="nav-link" href="#things"><img src="images/button.png" alt="">Things</a>
+                </li>
+                <li>
+                    <a class="nav-link" href="#bookshelf"><img src="images/button.png" alt="">Books</a>
+                </li>
             </ul>
         </nav>
 
-        <div style="display: flex; max-width: 500px;">
-            <img class="img-fluid" src="images/dee-banner4.png" 
-                style="margin-left: 2.5em; margin-top:2em; padding: 0 2em 2em 0;border-width: 2px;">
-        </div>
-        <div style="display:flex">
-            <p style="margin-top:2em;">Hi, I am Dee and this is my workspace where I carry out my experiments. I am a real person who was born 
-                in the Classic Cartoon Network era, hence the theme. A mechanical engineer and a creative coder, I am passionate about working
-                on new ideas and building them from scratch.
-                If you'd like to learn more about my work or potentially work with me, feel free to message me on <a
-                href="https://www.linkedin.com/in/devashri-vagholkar/" target="_blank">LinkedIn</a>.
-            </p>
-        </div>
-        <h2 id="Featured">Featured</h2>
-        <div class="card-group">
-            <div class="card">
-                <img src="./images/FabHandWear2.PNG" style="height: 50;" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">FabHandWear</h5>
-                    <p class="card-text">Personalized hand wearable fabrication pipeline
-                    </p>
-                    <a href="https://www.youtube.com/watch?v=0B0PWLcIURE&t=9s&ab_channel=CdesignLab" target="_blank"
-                        class="card-link">Watch Video</a>
-                    <a href="https://dl.acm.org/doi/abs/10.1145/3463518" target="_blank"
-                        class="card-link">See Publication</a>
-                </div>
+        <header class="hero" id="top">
+            <div class="hero-banner">
+                <img src="images/dee-banner4.png" alt="Dee banner illustration" class="img-fluid">
             </div>
-            <div class="card">
-                <img src="./images/IotMaker.PNG" style="height: 50;" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Iot Maker</h5>
-                    <p class="card-text">Creating high-level Electro-mechanical devices through live programming for youth
-                    </p>
-                    <a href="https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4007989" target="_blank"
-                        class="card-link">See Publication</a>
-                </div>
-            </div>
-        </div>
-        <div class="card-group">
-            <div class="card">
-                <img src="./images/Sketch2Sim.PNG" style="height: 50;" class="card-img-top" alt="...">
-                <div class="card-body">
-                <h5 class="card-title">Sketch2Sim</h5>
-                <p class="card-text">Interactive Design Interfaces to support Ideation & Rapid Prototyping
+            <div class="hero-copy">
+                <p>
+                    Hi, I'm Dee! 👋 Welcome to my lab, where ideas get built from scratch and experiments are always running. I'm a mechanical engineer and creative coder who grew up in the golden age of Cartoon Network, which explains the theme (and my belief that the best inventions start with a little mischief).
+                    I love the moment when a rough idea becomes something real, and I'm equally happy debugging a system or geeking out over a design detail.
+                    Curious about my work, or have something fun to build together? Let's chat on <a href="https://www.linkedin.com/in/devashri-vagholkar/" target="_blank" rel="noreferrer">LinkedIn</a>.
                 </p>
-                <a href="https://hammer.purdue.edu/articles/thesis/Interactive_Design_Interfaces_to_support_Ideation_Rapid_Prototyping/17151029/1" target="_blank"
-                    class="card-link">See Publication</a>
-                </div>
+                <div class="hero-actions"></div>
             </div>
-            <div class="card">
-                <img src="./images/Makemate.PNG" style="height: 50;" class="card-img-top" alt="...">
-                <div class="card-body">
-                <h5 class="card-title">Makemate</h5>
-                <p class="card-text">A collide-to-mate CAD assembly Proof of Concept
-                </p>
-                <a href="https://youtu.be/pqFnedggfao" target="_blank"
-                    class="card-link">Watch video</a>
-                </div>
-            </div>
+        </header>
+
+        <section class="portfolio-section" id="featured">
+            <h2>Featured</h2>
+            <div class="card-grid" id="featured-grid"></div>
+        </section>
+
+        <section class="portfolio-section" id="code">
+            <h2>Code</h2>
+            <div class="card-grid" id="code-grid"></div>
+        </section>
+
+        <section class="portfolio-section" id="things">
+            <h2>Things</h2>
+            <div class="card-grid" id="things-grid"></div>
+        </section>
+
+        <section class="portfolio-section" id="bookshelf">
+            <h2>Books</h2>
+            <div class="bookshelf" id="bookshelf-list"></div>
+        </section>
+
+        <div class="social-links" aria-label="Social media links">
+            <a href="https://www.linkedin.com/in/devashri-vagholkar/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/>
+                </svg>
+            </a>
+            <a href="https://github.com/devashriv" target="_blank" rel="noreferrer" aria-label="GitHub">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+            </a>
+            <a href="https://grabcad.com/dee-31" target="_blank" rel="noreferrer" aria-label="GrabCAD">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15.528 2.973a.75.75 0 0 1 .472.696v8.662a.75.75 0 0 1-.472.696l-7.25 2.9a.75.75 0 0 1-.557 0l-7.25-2.9A.75.75 0 0 1 0 12.331V3.669a.75.75 0 0 1 .471-.696L7.443.184l.004-.001.274-.11a.75.75 0 0 1 .558 0l.274.11.004.001 6.971 2.789Zm-1.374.527L8 5.962 1.846 3.5 1 3.839v.4l6.5 2.6v7.922l.5.2.5-.2V6.84l6.5-2.6v-.4l-.846-.339Z"/>
+                </svg>
+            </a>
+            <a href="https://www.deviantart.com/deevagh" target="_blank" rel="noreferrer" aria-label="DeviantArt">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                    <path d="M15.825.12a.5.5 0 0 1 .132.584c-1.53 3.43-4.743 8.17-7.095 10.64a6.067 6.067 0 0 1-2.373 1.534c-.018.227-.06.538-.16.868-.201.659-.667 1.479-1.708 1.74a8.118 8.118 0 0 1-3.078.132 3.659 3.659 0 0 1-.562-.135 1.382 1.382 0 0 1-.466-.247.714.714 0 0 1-.204-.288.622.622 0 0 1 .004-.443c.095-.245.316-.38.461-.452.394-.197.625-.453.867-.826.095-.144.184-.297.287-.472l.117-.198c.151-.255.326-.54.546-.848.528-.739 1.201-.925 1.746-.896.126.007.243.025.348.048.062-.172.142-.38.238-.608.261-.619.658-1.419 1.187-2.069 2.176-2.67 6.18-6.206 9.117-8.104a.5.5 0 0 1 .596.04z"/>
+                </svg>
+            </a>
         </div>
-        <h2 id="Code">Code</h2>
-        <div class="card-group">
-            <div class="card">
-                <img src="./images/minecraft.png" style="height: 100;" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Minecraft Modeler</h5>
-                    <p class="card-text">Stack up little cubes to create a model and download 3D-print ready STL files
-                    </p>
-                    <a href="examples/minecraft.html" target="_blank" class="card-link">Try It</a>
-                    <a href="https://www.youtube.com/watch?v=pFCn3ZnPYkE&t=30s&ab_channel=DevashriV" target="_blank"
-                        class="card-link">Watch video</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="./images/hand-para.png" style="height: 100;" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Parametric hand & Surface subdivision</h5>
-                    <p class="card-text">A simplified hand model with mesh smoothening usign surface subdivision</p>
-                    <a href="examples/hand_spread.html" target="_blank" class="card-link">Try It</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="./images/csg1.PNG" style="height: 100;" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">CSG operations</h5>
-                    <p class="card-text">A minimal workflow for performing CSG operations- intersect,
-                        subtract,
-                        union on primitive shapes</p>
-                    <a href="examples/three-csg-test-1.html" target="_blank" class="card-link">Try It</a>
-                </div>
-            </div>
-            <!--div class="card">
-                <img src="./images/face-selector.PNG" style="height: 100;" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Face selection</h5>
-                    <p class="card-text">Select the smallest face on a body. Toggle between triangular or
-                        square
-                        face selection.</p>
-                    <a href="examples/face-selector.html" target="_blank" class="card-link">Try It</a>
-                </div>
-            </div-->
-            <div class="card">
-                <img src="./images/bfs.PNG" style="height: 100;" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Breadth First Seearch</h5>
-                    <p class="card-text">Click on any two points on the geometry and see the shortest path between them
-                        rendered</p>
-                    <a href="examples/bfs.html" target="_blank" class="card-link">Try It</a>
-                </div>
-            </div>
-        </div>
-        <div class="card-group">
-            <div class="card">
-                <img src="./images/c++1.png" style="height: 100;" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Curves from Equations</h5>
-                    <p class="card-text">Creates curves based on user defined equations. Renders Frenet frames,
-                        osculating circle at different points and smoothens the curve.
-                    </p>
-                    <a href="https://youtu.be/sRqF8JrVRDU" target="_blank" class="card-link">Watch video</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="./images/c++2.png" style="height: 100;" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Bezier Curves</h5>
-                    <p class="card-text">Render a bazier curve with C1 continuity and passing through a bunch of random
-                        points in space</p>
-                    <a href="https://youtu.be/nzrM6BKyjbk" target="_blank" class="card-link">Watch video</a>
-                    <a href="pdfs/CS590_Lab02.pdf" target="_blank" class="card-link">Details</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="./images/c++3.png" style="height: 100;" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Catmull Clark surface subdivision</h5>
-                    <p class="card-text">Start with a simple mesh and perform subdivision to smoothen it and 3D print
-                        the final mesh</p>
-                    <a href="https://youtu.be/cc-gnuUr7Tw" target="_blank" class="card-link">Watch video</a>
-                </div>
-            </div>
-            <!--div class="card">
-                <img src="./images/face-selector.PNG" style="height: 100;" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Face selection</h5>
-                    <p class="card-text">Select the smallest face on a body. Toggle between triangular or
-                        square
-                        face selection.</p>
-                    <a href="examples/face-selector.html" target="_blank" class="card-link">Try It</a>
-                </div>
-            </div-->
-            <div class="card">
-                <img src="./images/c++4.png" style="height: 100;" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Meshes with IMGUI</h5>
-                    <p class="card-text">Load .obj mesh, use Imgui to move them, detect collision</p>
-                    <a href="https://youtu.be/rq_x3mpee5g" target="_blank" class="card-link">Watch Video</a>
-                </div>
-            </div>
-        </div>
-        <span>
-            <p>
 
-            </p>
-            <p>
-
-            </p>
-            <p>
-
-            </p>
-        </span>
-        <h2 id="Things">Things</h2>
-        <div class="card-group">
-            <div class="card">
-                <img src="./images/Chalopede.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Chalopede</h5>
-                    <p class="card-text">A hexapod robot that I built as a part of my undergraduate thesis project
-                    </p>
-                    <a href="./pdfs/Chalopede.pdf" target="_blank" class="card-link">Project details</a>
-                    <a href="https://grabcad.com/library/hexapod-12" target="_blank" class="card-link">CAD files</a>
-                </div>
+        <div class="more-section">
+            <a class="more-button" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample" aria-label="More content">
+                <img src="images/button.png" alt="More stuff button" />
+            </a>
+            <div class="collapse" id="collapseExample">
+                <p class="collapse-message">More stuff coming soon...</p>
             </div>
-            <div class="card">
-                <img src="./images/udaan.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Udaan</h5>
-                    <p class="card-text">
-                        A radio-controlled aircraft that our team designed and built as our entry for the AIAA
-                        Design/Build/Fly competition
-                    </p>
-                    <a href="./pdfs/Udaan.pdf" target="_blank" class="card-link">Project details</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="./images/auro.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Auro</h5>
-                    <p class="card-text">
-                        A wearable for the elderly ideated and built in a 24 hour hackathon
-                    </p>
-                    <a href="./pdfs/Auro.pdf" target="_blank" class="card-link">Project details</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="./images/sleek.png" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Sleek</h5>
-                    <p class="card-text">
-                        A design for manufacturability exercise of a bracelet.
-                    </p>
-                    <a href="pdfs/Sleek.pdf" target="_blank" class="card-link">Project details</a>
-                </div>
-            </div>
-        </div>
-        <div class="card-group">
-            <div class="card">
-                <img src="./images/feather.png" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Feather</h5>
-                    <p class="card-text">An ultra-light laptop stand with no permanent joints</p>
-                    <a href="./pdfs/feather.pdf" target="_blank" class="card-link">Project details</a>
-                    <a href="https://grabcad.com/library/laptop-stand-7" target="_blank" class="card-link">CAD files</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="./images/plotbot.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Plotbot</h5>
-                    <p class="card-text">
-                        A CNC plotter made from CD drives
-                    </p>
-                    <a href="./pdfs/plotbot.pdf" target="_blank" class="card-link">Project details</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="./images/Brix.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Brix</h5>
-                    <p class="card-text">
-                        Cardboard based modular assembly exploration
-                    </p>
-                    <a href="./pdfs/brix.pdf" target="_blank" class="card-link">Project details</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="./images/hatch door.png" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Hatchdoor</h5>
-                    <p class="card-text">
-                        An assembly of a CNC milled mechanically automated hatchdoor
-                    </p>
-                    <a href="pdfs/hatchdoor.pdf" target="_blank" class="card-link">Project details</a>
-                </div>
-            </div>
-        </div>
-        <div>
-            <a href="https://www.linkedin.com/in/devashri-vagholkar/" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-linkedin" viewBox="0 0 16 16">
-                <path d="M0 1.146C0 .513.526 0 1.175 0h13.65C15.474 0 16 .513 16 1.146v13.708c0 .633-.526 1.146-1.175 1.146H1.175C.526 16 0 15.487 0 14.854V1.146zm4.943 12.248V6.169H2.542v7.225h2.401zm-1.2-8.212c.837 0 1.358-.554 1.358-1.248-.015-.709-.52-1.248-1.342-1.248-.822 0-1.359.54-1.359 1.248 0 .694.521 1.248 1.327 1.248h.016zm4.908 8.212V9.359c0-.216.016-.432.08-.586.173-.431.568-.878 1.232-.878.869 0 1.216.662 1.216 1.634v3.865h2.401V9.25c0-2.22-1.184-3.252-2.764-3.252-1.274 0-1.845.7-2.165 1.193v.025h-.016a5.54 5.54 0 0 1 .016-.025V6.169h-2.4c.03.678 0 7.225 0 7.225h2.4z"/>
-              </svg></a>
-            <a href="https://github.com/devashriv" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
-                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-              </svg></a>
-            <a href="https://grabcad.com/dee-31" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-box-fill" viewBox="0 0 16 16">
-                <path fill-rule="evenodd" d="M15.528 2.973a.75.75 0 0 1 .472.696v8.662a.75.75 0 0 1-.472.696l-7.25 2.9a.75.75 0 0 1-.557 0l-7.25-2.9A.75.75 0 0 1 0 12.331V3.669a.75.75 0 0 1 .471-.696L7.443.184l.004-.001.274-.11a.75.75 0 0 1 .558 0l.274.11.004.001 6.971 2.789Zm-1.374.527L8 5.962 1.846 3.5 1 3.839v.4l6.5 2.6v7.922l.5.2.5-.2V6.84l6.5-2.6v-.4l-.846-.339Z"/>
-              </svg></a>
-              <a href="https://www.deviantart.com/deevagh" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-brush-fill" viewBox="0 0 16 16">
-                <path d="M15.825.12a.5.5 0 0 1 .132.584c-1.53 3.43-4.743 8.17-7.095 10.64a6.067 6.067 0 0 1-2.373 1.534c-.018.227-.06.538-.16.868-.201.659-.667 1.479-1.708 1.74a8.118 8.118 0 0 1-3.078.132 3.659 3.659 0 0 1-.562-.135 1.382 1.382 0 0 1-.466-.247.714.714 0 0 1-.204-.288.622.622 0 0 1 .004-.443c.095-.245.316-.38.461-.452.394-.197.625-.453.867-.826.095-.144.184-.297.287-.472l.117-.198c.151-.255.326-.54.546-.848.528-.739 1.201-.925 1.746-.896.126.007.243.025.348.048.062-.172.142-.38.238-.608.261-.619.658-1.419 1.187-2.069 2.176-2.67 6.18-6.206 9.117-8.104a.5.5 0 0 1 .596.04z"/>
-              </svg></a>
-        </div>
-        <!--span>
-            <p>
-
-            </p>
-            <p>
-
-            </p>
-            <p>
-
-            </p>
-        </span>
-        <h2 id="Design">Design</h2>
-        <div class="card-group">
-            <div class="card">
-                <img src="./images/feather.png" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Sketchbook</h5>
-                    <p class="card-text">An ultra-light laptop stand with no permanent joints</p>
-                    <a href="./pdfs/feather.pdf" target="_blank" class="card-link">Project details</a>
-                    <a href="https://grabcad.com/library/laptop-stand-7" target="_blank" class="card-link">CAD files</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="./images/plotbot.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Processing</h5>
-                    <p class="card-text">
-                        A CNC plotter made from CD drives
-                    </p>
-                    <a href="./pdfs/plotbot.pdf" target="_blank" class="card-link">Project details</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="./images/Brix.jpg" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Figma</h5>
-                    <p class="card-text">
-                        Cardboard based modular assembly exploration
-                    </p>
-                    <a href="./pdfs/brix.pdf" target="_blank" class="card-link">Project details</a>
-                </div>
-            </div>
-            <div class="card">
-                <img src="./images/hatch door.png" class="card-img-top" alt="...">
-                <div class="card-body">
-                    <h5 class="card-title">Hatchdoor</h5>
-                    <p class="card-text">
-                        An assembly of a CNC milled mechanically automated hatchdoor
-                    </p>
-                    <a href="pdfs/hatchdoor.pdf" target="_blank" class="card-link">Project details</a>
-                </div>
-            </div>
-        </div-->
-        <!--h2 id="Contact">Contact</h2>
-        <section class="mb-4">
-            <div class="row">
-                <div class="col-md-9 mb-md-0 mb-5">
-                    <form id="contact-form" name="contact-form" action="mail.php" method="POST">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="md-form mb-0">
-                                    <p>
-                                        <input type="text" id="name" name="name" class="form-control"
-                                            placeholder="Name">
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="md-form mb-0">
-                                    <p>
-                                        <input type="text" id="email" name="email" class="form-control"
-                                            placeholder="Email">
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="md-form mb-0">
-                                    <p>
-                                        <input type="text" id="subject" name="subject" class="form-control"
-                                            placeholder="Subject">
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="md-form">
-                                    <p>
-                                        <textarea type="text" id="message" name="message" rows="5"
-                                            class="form-control md-textarea" placeholder="Message"></textarea>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                    <div>
-                        <button type="button" class="btn btn-primary"
-                            onclick="document.getElementById('contact-form').submit();">Send</button>
-                    </div>
-                    <div class="status"></div>
-                </div>
-            </div>
-        </section-->
-        <span>
-            <p>
-
-            </p>
-            <p>
-
-            </p>
-        </span>
-        <div class="collapse" id="collapseExample">
-            <!--div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
-                <div class="carousel-inner">
-                    <div class="carousel-item active">
-                        <img class="d-block w-100" src="./images/slide-plotbot.JPG" alt="First slide">
-                    </div>
-                    <div class="carousel-item">
-                        <img class="d-block w-100" src="./images/Brix.jpg" alt="Second slide">
-                    </div>
-                    <div class="carousel-item">
-                        <img class="d-block w-100" src="..." alt="Third slide">
-                    </div>
-                </div>
-                <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Previous</span>
-                </a>
-                <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="sr-only">Next</span>
-                </a>
-            </div-->
-            <p class="text-center">More stuff coming soon...</p>
         </div>
     </div>
-    <p class="text-center">
-        <a class="vertical-center" data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false"
-            aria-controls="collapseExample"><img src="images/button.png" height="60" alt="">
-        </a>
-
-    </p>
-    <!--div class="lightbox-gallery">
-        <div class="container">
-            <div class="intro">
-                <h2 class="text-center">Secret Gallery</h2>
-                <p class="text-center"></p>
-            </div>
-            <div class="row photos">
-                <div class="col-sm-6 col-md-4 col-lg-3 item"><a href="images/sketch1.jpg"
-                        data-lightbox="photos"><img class="img-fluid" src="images/sketch1.jpg"></a>
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3 item"><a href="images/sketch2.jpg"
-                        data-lightbox="photos"><img class="img-fluid" src="images/sketch2.jpg"></a>
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3 item"><a href="images/origami1.jpg"
-                        data-lightbox="photos"><img class="img-fluid" src="images/origami1.jpg"></a>
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3 item"><a href="images/origami3.jpg"
-                        data-lightbox="photos"><img class="img-fluid" src="images/origami3.jpg"></a>
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3 item"><a href="images/prototype 1, rendering.png"
-                        data-lightbox="photos"><img class="img-fluid"
-                            src="images/prototype 1, rendering.png"></a>
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3 item"><a href="images/prototype 2 rendering.png"
-                        data-lightbox="photos"><img class="img-fluid"
-                            src="images/prototype 2 rendering.png"></a>
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3 item"><a href="images/Prototype 3 CAD.png"
-                        data-lightbox="photos"><img class="img-fluid" src="images/Prototype 3 CAD.png"></a>
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3 item"><a href="images/building.jpg"
-                        data-lightbox="photos"><img class="img-fluid" src="images/building.jpg"></a>
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3 item"><a href="images/Untitled3.png"
-                        data-lightbox="photos"><img class="img-fluid" src="images/Untitled3.png"></a>
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3 item"><a href="images/Untitled4.png"
-                        data-lightbox="photos"><img class="img-fluid" src="images/Untitled4.png"></a>
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3 item"><a href="images/Untitled6.png"
-                        data-lightbox="photos"><img class="img-fluid" src="images/Untitled6.png"></a>
-                </div>
-                <div class="col-sm-6 col-md-4 col-lg-3 item"><a href="images/Untitled7.png"
-                        data-lightbox="photos"><img class="img-fluid" src="images/Untitled7.png"></a>
-                </div>
-            </div>
-        </div>
-    </div-->
-    <span>
-        <p>
-
-        </p>
-        <p>
-
-        </p>
-        <p>
-
-        </p>
-    </span>
-    </div>
-
-
-    <script>
-        $(document).ready(function () {
-            $('li.active').removeClass('active');
-            $('a[href="' + location.pathname + location.search + '"]').closest('li').addClass('active');
-        });
-    </script>
 </body>
 
 </html>

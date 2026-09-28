@@ -1,0 +1,82 @@
+[
+  {
+    "title": "The Da Vinci Code",
+    "author": "Dan Brown",
+    "thumbnail": "images/the-davinci-code.jpg"
+  },
+  {
+    "title": "A Thousand Splendid Suns",
+    "author": "Khaled Hosseini",
+    "thumbnail": "images/a-thousand-splendid-suns.jpg"
+  },
+  {
+    "title": "The Silent Patient",
+    "author": "Alex Michaelides",
+    "thumbnail": "images/the-silent-patient.jpg"
+  },
+  {
+    "title": "Where the Crawdads Sing",
+    "author": "Delia Owens",
+    "thumbnail": "images/where-the-craw-dads-sing.jpg"
+  },
+  {
+    "title": "Verity",
+    "author": "Colleen Hoover",
+    "thumbnail": "images/verity.jpg"
+  },
+  {
+    "title": "Norwegian Wood",
+    "author": "Haruki Murakami",
+    "thumbnail": "images/norwegian-wood.jpg"
+  },
+  {
+    "title": "Big Magic",
+    "author": "Elizabeth Gilbert",
+    "thumbnail": "images/big-magic.jpg"
+  },
+  {
+    "title": "The Alchemist",
+    "author": "Paulo Coelho",
+    "thumbnail": "images/the-alchemist.jpg"
+  },
+  {
+    "title": "Digital Fortress",
+    "author": "Dan Brown",
+    "thumbnail": "images/digital-fortress.jpg"
+  },
+  {
+    "title": "Ikigai: The Japanese Secret to a Long and Happy Life",
+    "author": "Héctor García and Francesc Miralles",
+    "thumbnail": "images/ikigai.jpg"
+  },
+  {
+    "title": "Body: The Greatest Gadget",
+    "author": "Sadhguru",
+    "thumbnail": "images/body-the-greatest-gadget.jpg"
+  },
+  {
+    "title": "Nothing Lasts Forever",
+    "author": "Sidney Sheldon",
+    "thumbnail": "images/nothing-lasts-forever.jpg"
+  },
+  {
+    "title": "Steal Like an Artist",
+    "author": "Austin Kleon",
+    "thumbnail": "images/steal-like-an-artist.jpg"
+  },
+  {
+  "title": "All You Need Is Kill",
+  "author": "Hiroshi Sakurazaka",
+  "thumbnail": "images/all-you-need-is-kill.jpg"
+  },
+    {
+    "title": "The Courage to Be Disliked",
+    "author": "Ichiro Kishimi and Fumitake Koga",
+    "thumbnail": "images/the-courage-to-be-disliked.jpg"
+  },
+  {
+    "title": "The Power of Your Subconscious Mind",
+    "author": "Joseph Murphy",
+    "thumbnail": "images/the-power-of-your-subconscious-mind.jpg"
+  }
+]
