@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>CS 590 MAKEMATE V0</title>
+		
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+		<style>
+			body {
+				background-color: #f0f0f0;
+				color: #444;
+			}
+			a {
+				color: #08f;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div id="info">
+			CS 590 MAKEMATE V0<br />
+			Click on the components on the right bar to load them on screen<br />
+			Right click on components to activate handles<br />
+			Collide two components to enable mates
+		</div>
+		
+		<script type="module">
+
+			import * as THREE from '../build/three.module.js';
+
+            //Orbit control
+			import { OrbitControls } from './jsm/controls/OrbitControls.js';
+			//Transform handles
+			import { TransformControls } from './jsm/controls/TransformControls.js';
+			//GUI
+			import { GUI } from './jsm/libs/dat.gui.module.js';
+			//Export to stl for 3D printing
+			import { STLExporter } from './jsm/exporters/STLExporter.js';
+
+
+			
+			var container;
+			var camera, scene, renderer;
+
+            var exporter;
+			var orbit;
+
+            var objects = [];
+
+			var pendulum, material;
+			var merged_object;
+
+            //main function
+			init();
+            animate();
+            
+            
+			
+			function init() {
+
+				container = document.createElement( 'div' );
+				document.body.appendChild( container );
+				
+				//camera
+				var aspect = window.innerWidth / window.innerHeight;
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 5000 );
+				camera.position.z = 200;
+
+				//scene
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0xf0f0f0 );
+				scene.add( new THREE.AmbientLight( 0x505050 ) );
+				
+				//light
+				var light = new THREE.SpotLight( 0xffffff, 1.5 );
+				light.position.set( 0, 500, 2000 );
+				light.angle = Math.PI / 9;
+
+				//shadow
+				light.castShadow = true;
+				light.shadow.camera.near = 1000;
+				light.shadow.camera.far = 4000;
+				light.shadow.mapSize.width = 1024;
+				light.shadow.mapSize.height = 1024;
+
+				scene.add( light );
+
+				//renderer
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer.setPixelRatio( window.devicePixelRatio );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.shadowMap.enabled = true;
+				renderer.shadowMap.type = THREE.PCFShadowMap;
+				container.appendChild( renderer.domElement );
+
+                //orbit controls- to pan, zoom, rotate global coordinate system
+				orbit = new OrbitControls( camera, renderer.domElement );
+				orbit.update();
+				orbit.addEventListener( 'change', render );
+
+				//exporter
+				exporter = new STLExporter();
+                
+                 
+                
+				//objects.push(pendulum);
+                //ball.updateMatrix();
+                //pendulumGeo.merge(ball.geometry, ball.matrix);
+
+				//box.updateMatrix();
+				//pendulumGeo.merge(boxGeo, box.matrix);
+
+                //pendulum = new THREE.Mesh(pendulumGeo, material);
+                //scene.add(pendulum);
+                //objects.push(pendulum);
+                
+				mergeobj();
+
+                //load GUI
+				displaygui();
+                
+
+            }
+
+			function mergeobj()
+			{
+				var ballGeo = new THREE.SphereGeometry(10,35,35);
+                material = new THREE.MeshPhongMaterial({color: 0xF7FE2E}); 
+                var ball = new THREE.Mesh(ballGeo, material);
+				ball.position.set(10,0,0);
+				scene.add(ball);
+				objects.push(ball);
+
+				var boxGeo = new THREE.BoxGeometry(10,10,10);
+                //var material = new THREE.MeshPhongMaterial({color: 0xF7FE2E}); 
+                var box = new THREE.Mesh(boxGeo, material);
+				box.position.set(-10,0,0);
+				scene.add(box);
+				objects.push(box);
+
+                var pendulumGeo = new THREE.CylinderGeometry(1, 1, 50, 16);
+				pendulum = new THREE.Mesh(pendulumGeo, material);
+				scene.add(pendulum);
+				
+				//objects.push(pendulum);
+
+				for (var i = 0; i<objects.length; i++)
+				{
+					objects[i].updateMatrix();
+					pendulum.geometry.merge(objects[i].geometry, objects[i].matrix);
+				}
+				//merged_object = new THREE.Mesh(pendulum.geometry, material);
+				
+			}
+            
+           //STL export functions
+			function exportASCII(Mesh) {
+
+                var result = exporter.parse(Mesh);
+                //saveString( result, Mesh.concat(".stl") );
+                saveString(result, 'box.stl');
+
+            }
+
+            var link = document.createElement( 'a' );
+            link.style.display = 'none';
+            document.body.appendChild( link );
+
+            function save( blob, filename ) {
+
+                link.href = URL.createObjectURL( blob );
+                link.download = filename;
+                link.click();
+            }
+
+            function saveString( text, filename ) {
+
+                save( new Blob( [ text ], { type: 'text/plain' } ), filename );
+
+            }
+
+            function saveArrayBuffer( buffer, filename ) {
+
+                save( new Blob( [ buffer ], { type: 'application/octet-stream' } ), filename );
+
+            }
+
+            function export_all_ASCII ()
+            {
+                /*for ( var i = 0; i <objects.length; i++)
+                {
+                    exportASCII(objects[i]);
+                    
+                }*/
+				exportASCII(pendulum);
+            }
+
+            //GUI
+            function displaygui() 
+            {
+                var gui = new GUI();
+                //set menu items
+                var parameters = 
+                {
+                    
+                    exp_ASCII : function () { export_all_ASCII();}
+                    
+                };
+
+                gui.add(parameters, 'exp_ASCII').name('EXPORT STL');
+
+                gui.open();  //default show gui items
+            }				
+			
+            
+            function animate()
+			{
+                
+                
+				requestAnimationFrame(animate);
+                render();
+                
+			}
+
+			function render() 
+			{	
+                
+				renderer.clear();
+                renderer.render( scene, camera );	
+
+			}
+
+
+		
+		</script>
+
+	</body>
+</html>

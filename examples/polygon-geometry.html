@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>CS 590 MAKEMATE V0</title>
+
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0"
+    />
+    <link type="text/css" rel="stylesheet" href="main.css" />
+    <style>
+      body {
+        background-color: #f0f0f0;
+        color: #444;
+      }
+      a {
+        color: #08f;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="info">Pyramid parametric loader<br /></div>
+
+    <script type="module">
+      import * as THREE from "../build/three.module.js";
+
+      //Orbit control
+      import { OrbitControls } from "./jsm/controls/OrbitControls.js";
+      //Transform handles
+      import { TransformControls } from "./jsm/controls/TransformControls.js";
+      //GUI
+      import { GUI } from "./jsm/libs/dat.gui.module.js";
+      //Export to stl for 3D printing
+      import { STLExporter } from "./jsm/exporters/STLExporter.js";
+
+      import Pyramid from "./pyramid.js";
+      import Polyhedron from "./polyhedron.js";
+      import Prism from "./prism.js";
+
+      var container;
+      var camera, scene, renderer;
+
+      var exporter;
+      var orbit;
+
+      var mouse = new THREE.Vector2();
+      var raycaster = new THREE.Raycaster();
+      var gui;
+      var state = true;
+
+      var parts = [];
+
+      //main function
+      init();
+      animate();
+
+      function init() {
+        container = document.createElement("div");
+        document.body.appendChild(container);
+
+        //camera
+        var aspect = window.innerWidth / window.innerHeight;
+        camera = new THREE.PerspectiveCamera(
+          45,
+          window.innerWidth / window.innerHeight,
+          1,
+          5000
+        );
+        camera.position.z = 200;
+
+        //scene
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f0f0);
+        scene.add(new THREE.AmbientLight(0x505050));
+
+        //light
+        var light = new THREE.SpotLight(0xffffff, 1.5);
+        light.position.set(0, 500, 2000);
+        light.angle = Math.PI / 9;
+
+        //shadow
+        light.castShadow = true;
+        light.shadow.camera.near = 1000;
+        light.shadow.camera.far = 4000;
+        light.shadow.mapSize.width = 1024;
+        light.shadow.mapSize.height = 1024;
+
+        scene.add(light);
+
+        //renderer
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFShadowMap;
+        container.appendChild(renderer.domElement);
+
+        //orbit controls- to pan, zoom, rotate global coordinate system
+        orbit = new OrbitControls(camera, renderer.domElement);
+        orbit.update();
+        orbit.addEventListener("change", render);
+
+        //exporter
+        exporter = new STLExporter();
+
+        //load GUI
+        creategui();
+
+        window.addEventListener("dblclick", onDoubleClick, false);
+      }
+
+      function onDoubleClick(event) {
+        event.preventDefault();
+
+        //show handles on right click
+        mouse.x = (event.clientX / renderer.domElement.clientWidth) * 2 - 1;
+        mouse.y = -(event.clientY / renderer.domElement.clientHeight) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+
+        var intersects = raycaster.intersectObjects(parts, true);
+
+        if (intersects.length > 0) {
+          displayGUI(!state);
+          state = !state;
+        }
+      }
+
+      //STL export functions
+      function exportASCII(Mesh) {
+        var result = exporter.parse(Mesh);
+        //saveString( result, Mesh.concat(".stl") );
+        saveString(result, "box.stl");
+      }
+
+      var link = document.createElement("a");
+      link.style.display = "none";
+      document.body.appendChild(link);
+
+      function save(blob, filename) {
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+      }
+
+      function saveString(text, filename) {
+        save(new Blob([text], { type: "text/plain" }), filename);
+      }
+
+      function saveArrayBuffer(buffer, filename) {
+        save(
+          new Blob([buffer], { type: "application/octet-stream" }),
+          filename
+        );
+      }
+
+      function export_all_ASCII() {
+        for (var i = 0; i < parts.length; i++) {
+          exportASCII(parts[i]);
+        }
+      }
+
+      //Edit GUI
+
+      function displayGUI(state) {
+        gui.domElement.style.visibility = state ? "visible" : "hidden";
+      }
+      //GUI
+      function creategui(state) {
+        gui = new GUI();
+
+        //set menu items
+        var parameters = {
+          cube: function () {
+            loadCube();
+          },
+          cone: function () {
+            loadCone();
+          },
+          pyramid: function () {
+            loadPyramid();
+          },
+          prism: function () {
+            loadPrism();
+          },
+          polyhedron: function () {
+            loadPolyhedron();
+          },
+          exp_ASCII: function () {
+            export_all_ASCII();
+          },
+          debug: function () {
+            console.log(message);
+          },
+        };
+        gui.add(parameters, "cube").name("CUBE");
+        gui.add(parameters, "cone").name("CONE");
+        gui.add(parameters, "pyramid").name("PYRAMID");
+        gui.add(parameters, "prism").name("PRISM");
+        gui.add(parameters, "polyhedron").name("POLYHEDRON");
+        gui.add(parameters, "exp_ASCII").name("EXPORT STL");
+        gui.add(parameters, "debug").name("DEBUG");
+
+        gui.open(); //default show gui items
+      }
+
+      var message = "";
+
+      function animate() {
+        requestAnimationFrame(animate);
+        render();
+      }
+
+      function render() {
+        renderer.clear();
+        renderer.render(scene, camera);
+        for (var i = 0; i < parts.length; i++) {
+          parts[i].update();
+        }
+      }
+
+      function loadCube() {
+        var verticesOfCube = [
+          -1,
+          -1,
+          -1,
+          1,
+          -1,
+          -1,
+          1,
+          1,
+          -1,
+          -1,
+          1,
+          -1,
+          -1,
+          -1,
+          1,
+          1,
+          -1,
+          1,
+          1,
+          1,
+          1,
+          -1,
+          1,
+          1,
+        ];
+
+        var indicesOfFaces = [
+          2,
+          1,
+          0,
+          0,
+          3,
+          2,
+          0,
+          4,
+          7,
+          7,
+          3,
+          0,
+          0,
+          1,
+          5,
+          5,
+          4,
+          0,
+          1,
+          2,
+          6,
+          6,
+          5,
+          1,
+          2,
+          3,
+          7,
+          7,
+          6,
+          2,
+          4,
+          5,
+          6,
+          6,
+          7,
+          4,
+        ];
+
+        var geometry = new THREE.PolyhedronGeometry(
+          verticesOfCube,
+          indicesOfFaces,
+          6,
+          0
+        );
+        var material = new THREE.MeshStandardMaterial({
+          color: 0xffff66,
+          flatShading: true,
+        });
+        var mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+      }
+
+      function loadCone() {
+        var geometry = new THREE.ConeGeometry(5, 20, 30);
+        var material = new THREE.MeshStandardMaterial({
+          color: 0xffff66,
+          flatShading: true,
+        });
+        var cone = new THREE.Mesh(geometry, material);
+        scene.add(cone);
+      }
+
+      function loadPyramid() {
+        var pyramid = new Pyramid(5, 20, 30);
+        scene.add(pyramid.mesh);
+        parts.push(pyramid.mesh);
+      }
+
+      function loadPrism() {
+        var prism = new Prism({ sides: 5, width: 20, height: 30 });
+        scene.add(prism);
+        parts.push(prism);
+        //window.addEventListener("dblclick", showGUI(prism.mesh), false);
+        var editGUI = new GUI();
+        var params = {
+          sides: prism.sides,
+          width: prism.width,
+          height: prism.height,
+        };
+        editGUI
+          .add(params, "sides")
+          .min(3)
+          .max(20)
+          .step(1)
+          .onChange(function (val) {
+            prism.updateSides(val);
+            prism.update();
+            //console.log(prism.sides);
+          });
+        editGUI
+          .add(params, "width")
+          .min(20)
+          .max(100)
+          .step(1)
+          .onChange(function (val) {
+            prism.updateWidth(val);
+            prism.update();
+            //console.log(prism.sides);
+          });
+        editGUI
+          .add(params, "height")
+          .min(20)
+          .max(100)
+          .step(1)
+          .onChange(function (val) {
+            prism.updateHeight(val);
+            prism.update();
+            //console.log(prism.sides);
+          });
+        editGUI.domElement.style.visibility = "visible";
+        prism.update();
+      }
+
+      function loadPolyhedron() {
+        var polyhedron = new Polyhedron(5, 20, 30);
+        scene.add(polyhedron.mesh);
+        parts.push(polyhedron.mesh);
+      }
+    </script>
+  </body>
+</html>

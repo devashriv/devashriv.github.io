@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>2D exporter</title>
+		
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+		<style>
+			body {
+				background-color: #f0f0f0;
+				color: #444;
+			}
+			a {
+				color: #08f;
+			}
+		</style>
+		<script src="../build/three.js"></script>
+		<script src = "./vendor/Makerjs/browser.maker.js"></script>
+		<script src="https://pomax.github.io/bezierjs/bezier.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<script type="module" >
+		//render a model with paths that form an endless chain
+		
+var makerjs = require('makerjs');
+
+var model = {
+
+  paths: {
+    "v": new makerjs.paths.Line([0, 0], [0, 100]),
+    "h": new makerjs.paths.Line([0, 0], [100, 0]),
+    "arc":new makerjs.paths.Arc([0, 0], 100, 0, 90)
+  }
+
+};
+
+var svg = makerjs.exporter.toSVG(model);
+
+//document.write(svg);
+//var svgData = $("#figureSvg")[0].outerHTML;
+
+/*
+//download the SVG
+var svgBlob = new Blob([svg], {type:"image/svg+xml;charset=utf-8"});
+var svgUrl = URL.createObjectURL(svgBlob);
+var downloadLink = document.createElement("a");
+downloadLink.href = svgUrl;
+downloadLink.download = "newesttree.svg";
+document.body.appendChild(downloadLink);
+downloadLink.click();
+document.body.removeChild(downloadLink);
+*/
+
+</script>
+        
+	</body>

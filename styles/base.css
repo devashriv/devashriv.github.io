@@ -1,0 +1,131 @@
+:root {
+  --bg-page: #f7f4f8;
+  --bg-soft: #f0ebf5;
+  --panel: #ffffff;
+  --panel-alt: #f7f3fa;
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --ink: #1d1d1f;
+  --muted: #5c5d63;
+  --purple: #5b2d86;
+  --purple-deep: #2c1757;
+  --orange: #ef7a3b;
+  --orange-soft: #f7d4b0;
+  --border: rgba(48, 41, 58, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(180deg, #fffaf8, var(--bg-page));
+  color: var(--ink);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+p {
+  margin: 0 0 1rem;
+  line-height: 1.65;
+}
+
+h1, h2, h3, h4, h5 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
+  color: var(--purple-deep);
+}
+
+.container {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  box-shadow: none;
+  overflow: hidden;
+  min-height: 100%;
+}
+
+.card-img-top {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  object-position: left center;
+  background: #ede7f5;
+}
+
+.card-body {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding: 1.25rem 1.25rem 1rem;
+}
+
+.card-title {
+  font-size: 1.15rem;
+  margin-bottom: 0.6rem;
+}
+
+.card-text {
+  color: var(--muted);
+  flex: 1 1 auto;
+}
+
+.card-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.card-link {
+  color: var(--purple);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.8rem;
+  border: 1px solid rgba(91, 45, 134, 0.2);
+  border-radius: 10px;
+  background: rgba(91, 45, 134, 0.05);
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+.card-link:hover {
+  color: var(--purple-deep);
+  background: rgba(120, 120, 120, 0.12);
+  border-color: rgba(120, 120, 120, 0.28);
+}
+
+@media (max-width: 767px) {
+  .card-img-top {
+    height: 210px;
+  }
+}
